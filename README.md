@@ -5,3 +5,4 @@ In this project we develop a social media application
 - user based chat.
 - group chat.
 - Google Sign in method.
+- add user based profile and chatting access 😊
