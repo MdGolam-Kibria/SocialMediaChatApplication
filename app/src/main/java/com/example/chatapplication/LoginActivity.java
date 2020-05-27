@@ -27,13 +27,15 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
@@ -200,6 +202,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             progressDialog.setMessage("Login User........");
                             progressDialog.show();
                             FirebaseUser user = mAuth.getCurrentUser();
+
+
+                            // get user id and email from firebase auth
+                            String email = user.getEmail();
+                            String uid = user.getUid();
+                            // when user resisteried store user info to realtime database
+                            //using hasmap
+                            HashMap<Object,String> hashMap = new HashMap<>();
+                            hashMap.put("email",email);
+                            hashMap.put("uid",uid);
+                            hashMap.put("name","");// will add later
+                            hashMap.put("phone","");// will add later
+                            hashMap.put("image","");// will add later
+                            hashMap.put("cover","");// will add later
+                            //Firebase database instance
+                            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                            //path to store user data named "Users";
+                            DatabaseReference databaseReference = firebaseDatabase.getReference("Users");
+                            //put data within hasmap in database
+                            databaseReference.child(uid).setValue(hashMap);
+
+
                             Toast.makeText(LoginActivity.this, "" + user.getEmail(), Toast.LENGTH_LONG).show();
                             updateUI(user);
                         } else {
@@ -223,7 +247,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void updateUI(FirebaseUser user) {
         if (!user.getEmail().equals(null)) {
-            Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+            Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
             /**
              * after add the two FLAGS after change activity can't back previous activity
              */
@@ -279,8 +303,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("sss", "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+
+                            if (task.getResult().getAdditionalUserInfo().isNewUser()){
+                                String email = user.getEmail();
+                                String uid = user.getUid();
+                                HashMap<Object,String> hashMap = new HashMap<>();
+                                hashMap.put("email",email);
+                                hashMap.put("uid",uid);
+                                hashMap.put("name","");
+                                hashMap.put("password","");
+                                hashMap.put("image","");
+                                hashMap.put("cover","");
+                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                DatabaseReference databaseReference = firebaseDatabase.getReference("Users");
+                                databaseReference.child(uid).setValue(hashMap);
+                            }
                             Toast.makeText(LoginActivity.this, "success = " + user.getEmail(), Toast.LENGTH_SHORT).show();//show curent user email
-                            Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+                            Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
                             /**
                              * after add the two FLAGS after change activity can't back previous activity
                              */

@@ -19,7 +19,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class ResisterActivity extends AppCompatActivity implements View.OnClickListener {
@@ -93,6 +96,27 @@ public class ResisterActivity extends AppCompatActivity implements View.OnClickL
                             // Sign in success, update UI with the signed-in user's information
                             progressDialog.dismiss();
                             FirebaseUser user = mAuth.getCurrentUser();
+
+                            // get user id and email from firebase auth
+                            String email = user.getEmail();
+                            String uid = user.getUid();
+                            // when user resisteried store user info to realtime database
+                            //using hasmap
+                            HashMap<Object,String> hashMap = new HashMap<>();
+                            hashMap.put("email",email);
+                            hashMap.put("uid",uid);
+                            hashMap.put("name","");// will add later
+                            hashMap.put("phone","");// will add later
+                            hashMap.put("image","");// will add later
+                            hashMap.put("cover","");// will add later
+                            //Firebase database instance
+                            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                            //path to store user data named "Users";
+                            DatabaseReference databaseReference = firebaseDatabase.getReference("Users");
+                            //put data within hasmap in database
+                            databaseReference.child(uid).setValue(hashMap);
+
+
                             Toast.makeText(ResisterActivity.this, "successfully signin" + user.getEmail(), Toast.LENGTH_SHORT).show();
                             //startActivity(new Intent(ResisterActivity.this, ProfileActivity.class));
                             updateUI(user);
@@ -111,7 +135,7 @@ public class ResisterActivity extends AppCompatActivity implements View.OnClickL
     private void updateUI(FirebaseUser user) {
         if (!user.getEmail().equals(null)) {
             Toast.makeText(this, "" + user.getEmail(), Toast.LENGTH_LONG).show();
-            startActivity(new Intent(ResisterActivity.this, ProfileActivity.class));
+            startActivity(new Intent(ResisterActivity.this, DashBoardActivity.class));
 //            finish();
         } else {
             Toast.makeText(this, "no resister", Toast.LENGTH_SHORT).show();
