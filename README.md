@@ -7,5 +7,5 @@ In this project we develop a social media application
 - group chat.
 - Google Sign in method.
 - add user based profile and chatting access 😊
-- update profile  features.
+- update profile  features using UI.
 - 
