@@ -18,7 +18,8 @@
                 android:id="@+id/coverIv"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:background="#761E97"></ImageView>
+                android:background="#761E97"
+                android:scaleType="fitXY"></ImageView>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -34,11 +35,13 @@
                     android:layout_marginLeft="20dp"
                     android:background="@color/colorPrimary"
                     android:padding="5dp"
+                    android:scaleType="fitXY"
                     android:src="@drawable/cover_photo" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#3F1050"
                     android:orientation="vertical">
 
                     <TextView

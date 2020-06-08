@@ -17,14 +17,20 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,9 +40,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+
 import static android.app.Activity.RESULT_OK;
+import static com.google.firebase.storage.FirebaseStorage.getInstance;
 
 
 /**
@@ -51,6 +63,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
+    //storage
+    StorageReference storageReference;
+    //path where storage of user profile and cover photo will be stored.
+    String storagePath = "Users_Profile_Cover_Imgs/";
+
     private static final int CAMERA_REQUEST_CODE = 100;
     private static final int STORAGE_REQUEST_CODE = 200;
     private static final int IMAGE_PICK_CAMERA_REQUEST_CODE = 300;
@@ -60,7 +77,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     String storagePermission[];
     //uri for picked image
     Uri image_uri;
-        //..for chacking profilr or cover photo
+    //..for chacking profilr or cover photo
     String profileOrCoverPhoto;////////////////////////////////////////////////////////////////////stop from here 35:12 video
 
     public ProfileFragment() {
@@ -81,7 +98,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         floatingActionButton.setOnClickListener(this);
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference("Users");
+        storageReference =getInstance().getReference();//This is firebase storage reference.
         databaseReference.keepSynced(true);
         progressDialog = new ProgressDialog(getActivity());
 
@@ -144,7 +163,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     }
 
     private void requestStoragePermission() {//for Gallery
-        ActivityCompat.requestPermissions(getActivity(), storagePermission, STORAGE_REQUEST_CODE);
+        requestPermissions(storagePermission, STORAGE_REQUEST_CODE);
     }
 
 
@@ -172,16 +191,22 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 if (which == 0) {
                     //edit profile clicked
                     progressDialog.setMessage("Updating Profile Pic...");
+                    profileOrCoverPhoto = "image";//changing profile picture make sure assign same value.
                     showImagePicDialog();
                 } else if (which == 1) {
                     // Edit Cover Photo click
                     progressDialog.setMessage("Editing Cover photo....");
+                    profileOrCoverPhoto = "cover";//changing cover photo make sure assign same value.
+                    showImagePicDialog();
                 } else if (which == 2) {
                     // Edit name click
                     progressDialog.setMessage("Editing name....");
+                    //calling method and pass key "name" as a parameter  to update its value in database so...
+                    showNamePhoneUpdateDialog("name");
                 } else if (which == 3) {
                     // Edit phone click
                     progressDialog.setMessage("Editing phone....");
+                    showNamePhoneUpdateDialog("phone");
 
                 }
             }
@@ -189,7 +214,60 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         builder.create().show();
     }
 
-    private void showImagePicDialog() {
+    private void showNamePhoneUpdateDialog(final String key) {
+        /*parameter name will contains value :
+        - either "name" which is key in user's database which is used to update user's name,
+        or
+        - either "phone" which is key in user's database which is used to update user's phone,
+         */
+        //custom dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("update " + key);//update name or update phone depends on key
+        //set Layout of dialog
+        LinearLayout linearLayout = new LinearLayout(getActivity());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setPadding(10, 10, 10, 10);
+        final EditText editText = new EditText(getActivity());
+        editText.setHint("Enter your " + key);
+        linearLayout.addView(editText);
+        builder.setView(linearLayout);
+        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String value = editText.getText().toString().trim();
+                if (!TextUtils.isEmpty(value)) {//if user input is empty
+                    progressDialog.show();
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put(key, value);
+                    databaseReference.child(user.getUid()).updateChildren(hashMap)//update name/phone
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    //if update name/phone here will be response
+                                    progressDialog.dismiss();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            //something error here
+                            progressDialog.dismiss();
+                            Toast.makeText(getActivity(), "error update name/phone" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(getActivity(), "please enter your " + key, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+builder.create().show();
+    }
+
+    private void showImagePicDialog() {///problem here
         //show dialog containing option camera and gallery to pick the image.
         String options[] = {"Gallery", "Camera"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -202,7 +280,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     if (!checkCameraPermission()) {
                         requestCameraPermission();
                     } else {
-                        pickFromCamera();
+//                        pickFromCamera();
+                        pickFromGallery();
                     }
                     progressDialog.setMessage("Updating Profile Pic...");
                     showImagePicDialog();
@@ -212,7 +291,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     if (checkStoragePermission()) {
                         requestStoragePermission();
                     } else {
-                        pickFromGallery();
+                        pickFromCamera();
+                        //pickFromGallery();
                     }
                 }
             }
@@ -241,6 +321,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     }
                 }
             }
+            break;
             case STORAGE_REQUEST_CODE: {
                 //picking from gallery first check camera permission allowed or not
                 if (grantResults.length > 0) {
@@ -254,21 +335,23 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         Toast.makeText(getActivity(), "Please enable storage permission", Toast.LENGTH_SHORT).show();
                     }
                 }
+                break;
             }
         }
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //this method will be called after picking image from camera or gallery
-        if (requestCode==RESULT_OK){
-            if (requestCode==IMAGE_PICK_GALLERY_REQUEST_CODE){
+        if (requestCode == RESULT_OK) {
+            if (requestCode == IMAGE_PICK_GALLERY_REQUEST_CODE) {
                 //image picked from gallery , get image uri
-                image_uri=data.getData();
+                image_uri = data.getData();
                 uploadProfileCoverPhoto(image_uri);
-            }if (requestCode==IMAGE_PICK_CAMERA_REQUEST_CODE){
+            }
+            if (requestCode == IMAGE_PICK_CAMERA_REQUEST_CODE) {
                 //image picked from camera , get image uri
                 uploadProfileCoverPhoto(image_uri);
             }
@@ -276,7 +359,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void uploadProfileCoverPhoto(Uri image_uri) {
+    private void uploadProfileCoverPhoto(final Uri uri) {
+        //show progress
+        progressDialog.show();
         //**instead creating saparate function for profile picture and cover photo
         //i am doing work for both in same function
         //
@@ -284,26 +369,85 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         //"Edit Profile Pic" and assign it value "cover" when user clicked edit cover photo.
         //here image is the key in each user containing url of user profile picture.
         //here cover is the key in each user containing url of user cover photo.
+
+        /**the paramiter "image_uri" contains the image uri picked either from camera or gallery
+         * we will use UID of the currently signed in user as name of the image so there will be only one image profile and one image for
+         * profile each other
+         */
+        //path and name of image to be stored in firebase storage
+        //foe ex: Users_Profile_Cover_Imgs/image_endfjdaknk.jpg
+        //foe ex: Users_Profile_Cover_Imgs/cover_endfjdaknk.jpg
+        String filePathAndName = storagePath + "" + profileOrCoverPhoto + "_" + user.getUid();
+        StorageReference storageReference2nd = storageReference.child(filePathAndName);
+        storageReference2nd.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //image is upload to storage .now gets its url and store in user's database
+                Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                while (!uriTask.isSuccessful()) ;
+                Uri dawonloadUri = uriTask.getResult();
+                //check if image is uploaded or not and url is received
+                if (uriTask.isSuccessful()) {
+                    //image uploaded
+                    //add/update url in users database
+                    HashMap<String, Object> results = new HashMap<>();
+                    /*here first paramiter is  profileOrCoverPhoto that has value "image" or "cover"
+                    which are keys in users database where url of image will be saved in one of them
+
+                    secound paramiter contains the url og image stored in firebase storage this url will be saved as value
+                     against key "image" or  "cover"*/
+                    results.put(profileOrCoverPhoto, dawonloadUri.toString());
+                    databaseReference.child(user.getUid()).updateChildren(results)//updated here
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    //url in database of user is added sucessfully
+                                    //change progress dialog
+                                    progressDialog.dismiss();
+                                    Toast.makeText(getActivity(), "image updated", Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            Toast.makeText(getActivity(), "error from update image = " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } else {
+                    //error here
+                    progressDialog.dismiss();
+                    Toast.makeText(getActivity(), "some error occurd from upload image ", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                ////there are some error(s) progressDialog will dismiss here
+                progressDialog.dismiss();
+                Toast.makeText(getContext(), "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     private void pickFromCamera() {
-    //intent of picking image of device camera
+        //intent of picking image of device camera
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE,"temp pic");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION,"temp description");
+        contentValues.put(MediaStore.Images.Media.TITLE, "temp pic");
+        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "temp description");
         //put image uri
-        image_uri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues);
+        image_uri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
         //intent to start camera
         Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        camera_intent.putExtra(MediaStore.EXTRA_OUTPUT,image_uri);
-        startActivityForResult(camera_intent,IMAGE_PICK_CAMERA_REQUEST_CODE);
+        camera_intent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
+        startActivityForResult(camera_intent, IMAGE_PICK_CAMERA_REQUEST_CODE);
     }
 
     private void pickFromGallery() {
 //intent of picking image from gallery
         Intent gallery_intent = new Intent(Intent.ACTION_PICK);
         gallery_intent.setType("image/*");
-        startActivityForResult(gallery_intent,IMAGE_PICK_GALLERY_REQUEST_CODE);
+        startActivityForResult(gallery_intent, IMAGE_PICK_GALLERY_REQUEST_CODE);
     }
 }
 
