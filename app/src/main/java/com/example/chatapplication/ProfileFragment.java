@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -55,10 +56,23 @@ import static com.google.firebase.storage.FirebaseStorage.getInstance;
  * A simple {@link Fragment} subclass.
  */
 public class ProfileFragment extends Fragment implements View.OnClickListener {
-    ProgressDialog progressDialog;
     ImageView avaterIv, coverIv;
     TextView nameTv, emailTv, phoneTv;
-    FloatingActionButton floatingActionButton;
+    FloatingActionButton fab;
+    ProgressDialog pd;
+    //permission contains
+    public static final int CAMERA_REQUEST_CODE = 100;
+    public static final int STORAGE_REQUEST_CODE = 200;
+    public static final int IMAGE_PIC_GALLERY_CODE = 300;
+    public static final int IMAGE_PIC_CAMERA_CODE = 400;
+    //ARRAYS OF PERMISSION TO BE REQUESTED
+    String cameraPermission[];
+    String storagePermission[];
+    //uri for picked image
+    Uri image_uri;
+    //..for chacking profilr or cover photo
+    String profileOrCoverPhoto;
+//firebase
     FirebaseAuth firebaseAuth;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
@@ -68,17 +82,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     //path where storage of user profile and cover photo will be stored.
     String storagePath = "Users_Profile_Cover_Imgs/";
 
-    private static final int CAMERA_REQUEST_CODE = 100;
-    private static final int STORAGE_REQUEST_CODE = 200;
-    private static final int IMAGE_PICK_CAMERA_REQUEST_CODE = 300;
-    private static final int IMAGE_PICK_GALLERY_REQUEST_CODE = 400;
-    //ARRAYS OF PERMISSION TO BE REQUESTED
-    String cameraPermission[];
-    String storagePermission[];
-    //uri for picked image
-    Uri image_uri;
-    //..for chacking profilr or cover photo
-    String profileOrCoverPhoto;////////////////////////////////////////////////////////////////////stop from here 35:12 video
+
+
+
+
+
+
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -90,22 +99,24 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         avaterIv = view.findViewById(R.id.avaterIv);
+        coverIv = view.findViewById(R.id.coverIv);
         nameTv = view.findViewById(R.id.nameTv);
         emailTv = view.findViewById(R.id.emailTv);
         phoneTv = view.findViewById(R.id.phoneTv);
-        coverIv = view.findViewById(R.id.coverIv);
-        floatingActionButton = view.findViewById(R.id.fab);
-        floatingActionButton.setOnClickListener(this);
+        fab = view.findViewById(R.id.fab);
+        pd = new ProgressDialog(getActivity());
+        fab.setOnClickListener(this);
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("Users");
-        storageReference =getInstance().getReference();//This is firebase storage reference.
-        databaseReference.keepSynced(true);
-        progressDialog = new ProgressDialog(getActivity());
-
+        storageReference = getInstance().getReference();//firebase storage refarence
+        //int arrays of permission
         cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+
+
 
          /*we have to get info of currently signed user,we can get it using user email or user id here i want to use email
          ///by using order by child query we will show the detail from node which key name email has value equal currently signed email.
@@ -121,18 +132,24 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     String phone = "" + ds.child("phone").getValue();
                     String image = "" + ds.child("image").getValue();
                     String cover = "" + ds.child("cover").getValue();
-                    Toast.makeText(getContext(), "" + dataSnapshot.child("email").getValue(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "" + dataSnapshot.child("email").getValue(), Toast.LENGTH_SHORT).show();
                     nameTv.setText(name);
                     emailTv.setText(email);
                     phoneTv.setText(phone);
                     try {
 
                         Picasso.get().load(image).into(avaterIv);
-                        Picasso.get().load(cover).into(coverIv);
+
                     } catch (Exception e) {
                         Picasso.get().load(R.drawable.profile_icon).into(avaterIv);
-                        Picasso.get().load(R.drawable.user_icon).into(avaterIv);
-                        Log.d("image", e.getMessage());
+                    }
+
+                    try {
+
+                        Picasso.get().load(cover).into(coverIv);
+
+                    } catch (Exception e) {
+
                     }
                 }
             }
@@ -155,32 +172,33 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+
+
     private boolean checkStoragePermission() {//for Gallery
         //check if storage permission is enabled or not
-        //if enabled return true else false.
-        boolean result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_DENIED);
+        //return true if enabled
+        //return false if not enabled
+        boolean result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == (PackageManager.PERMISSION_GRANTED);
         return result;
     }
-
     private void requestStoragePermission() {//for Gallery
-        requestPermissions(storagePermission, STORAGE_REQUEST_CODE);
+       requestPermissions(storagePermission, STORAGE_REQUEST_CODE);
     }
-
-
     private boolean checkCameraPermission() {//for camera
         //check if storage permission is enabled or not
-        //if enabled return true else false.
-        boolean result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == (PackageManager.PERMISSION_GRANTED);
-        boolean result1 = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
+        //return true if enabled
+        //return false if not enabled
+        boolean result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
+                == (PackageManager.PERMISSION_GRANTED);
 
+        boolean result1 = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == (PackageManager.PERMISSION_GRANTED);
         return result && result1;
     }
-
     private void requestCameraPermission() {//for camera
-        ActivityCompat.requestPermissions(getActivity(), cameraPermission, CAMERA_REQUEST_CODE);
+        requestPermissions(cameraPermission, CAMERA_REQUEST_CODE);
     }
-
-
     private void showEditProfileDialog() {
         String options[] = {"Edit Profile Picture", "Edit Cover Photo", "Edit Name", "Edit Phone"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -190,22 +208,22 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             public void onClick(DialogInterface dialog, int which) {
                 if (which == 0) {
                     //edit profile clicked
-                    progressDialog.setMessage("Updating Profile Pic...");
-                    profileOrCoverPhoto = "image";//changing profile picture make sure assign same value.
+                    pd.setMessage("Updating Profile Pic...");
+                    profileOrCoverPhoto = "image";//changing profile picture make sure to assign same value.
                     showImagePicDialog();
                 } else if (which == 1) {
                     // Edit Cover Photo click
-                    progressDialog.setMessage("Editing Cover photo....");
-                    profileOrCoverPhoto = "cover";//changing cover photo make sure assign same value.
+                    pd.setMessage("Updating Cover photo....");
+                    profileOrCoverPhoto = "cover";//changing profile picture make sure to assign same value.
                     showImagePicDialog();
                 } else if (which == 2) {
                     // Edit name click
-                    progressDialog.setMessage("Editing name....");
+                    pd.setMessage("Updating name....");
                     //calling method and pass key "name" as a parameter  to update its value in database so...
                     showNamePhoneUpdateDialog("name");
                 } else if (which == 3) {
                     // Edit phone click
-                    progressDialog.setMessage("Editing phone....");
+                    pd.setMessage("Updating phone....");
                     showNamePhoneUpdateDialog("phone");
 
                 }
@@ -213,6 +231,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         });
         builder.create().show();
     }
+
 
     private void showNamePhoneUpdateDialog(final String key) {
         /*parameter name will contains value :
@@ -236,21 +255,23 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             public void onClick(DialogInterface dialog, int which) {
                 String value = editText.getText().toString().trim();
                 if (!TextUtils.isEmpty(value)) {//if user input is empty
-                    progressDialog.show();
-                    HashMap<String, Object> hashMap = new HashMap<>();
-                    hashMap.put(key, value);
-                    databaseReference.child(user.getUid()).updateChildren(hashMap)//update name/phone
+                    pd.show();
+                    HashMap<String, Object> result = new HashMap<>();
+                    result.put(key, value);
+                    databaseReference.child(user.getUid()).updateChildren(result)//update name/phone
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     //if update name/phone here will be response
-                                    progressDialog.dismiss();
+                                    pd.dismiss();
+                                    Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             //something error here
-                            progressDialog.dismiss();
+                            pd.dismiss();
                             Toast.makeText(getActivity(), "error update name/phone" + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -264,35 +285,33 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
             }
         });
-builder.create().show();
+        builder.create().show();
     }
 
     private void showImagePicDialog() {///problem here
         //show dialog containing option camera and gallery to pick the image.
-        String options[] = {"Gallery", "Camera"};
+        String options[] = {"Camera","Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pick Image From ");
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (which == 0) {
-                    //Gallery click
+                    //camera clicked
                     if (!checkCameraPermission()) {
                         requestCameraPermission();
                     } else {
-//                        pickFromCamera();
-                        pickFromGallery();
+                        pickFromCamera();
                     }
-                    progressDialog.setMessage("Updating Profile Pic...");
+                    pd.setMessage("Updating Profile Pic...");
                     showImagePicDialog();
                 } else if (which == 1) {
-                    //Camera clicked
-                    progressDialog.setMessage("Editing Cover photo....");
-                    if (checkStoragePermission()) {
+                    //gallery clicked
+                    pd.setMessage("Editing Cover photo....");
+                    if (!checkStoragePermission()) {
                         requestStoragePermission();
                     } else {
-                        pickFromCamera();
-                        //pickFromGallery();
+                        pickFromGallery();
                     }
                 }
             }
@@ -300,7 +319,6 @@ builder.create().show();
         builder.create().show();
 
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         //this method call when user allow or deny from permission request dialog
@@ -308,7 +326,7 @@ builder.create().show();
 
         switch (requestCode) {
             case CAMERA_REQUEST_CODE: {
-                //picking from camera first check camera permission allowed or not
+                //picking from camera first check if  camera and storage permission allowed or not
                 if (grantResults.length > 0) {
                     boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
@@ -317,51 +335,48 @@ builder.create().show();
                         pickFromCamera();
                     } else {
                         //permission denied
-                        Toast.makeText(getActivity(), "Please enable camera and storage permission", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Please enabled camera and storage permission", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
             break;
             case STORAGE_REQUEST_CODE: {
-                //picking from gallery first check camera permission allowed or not
+                //picking from storage first check if storage permission allowed or not
                 if (grantResults.length > 0) {
-                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (cameraAccepted && writeStorageAccepted) {
+                    if (writeStorageAccepted) {
                         //permission enabled
                         pickFromGallery();
                     } else {
                         //permission denied
-                        Toast.makeText(getActivity(), "Please enable storage permission", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Please enabled storage permission", Toast.LENGTH_SHORT).show();
                     }
                 }
-                break;
             }
+            break;
         }
-
-        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //this method will be called after picking image from camera or gallery
         if (requestCode == RESULT_OK) {
-            if (requestCode == IMAGE_PICK_GALLERY_REQUEST_CODE) {
-                //image picked from gallery , get image uri
+            if (requestCode == IMAGE_PIC_GALLERY_CODE) {
+                //image is picked from gallery , get uri of image
                 image_uri = data.getData();
                 uploadProfileCoverPhoto(image_uri);
             }
-            if (requestCode == IMAGE_PICK_CAMERA_REQUEST_CODE) {
-                //image picked from camera , get image uri
+            if (requestCode == IMAGE_PIC_CAMERA_CODE) {
+                //image picked from camera , get uri of image
                 uploadProfileCoverPhoto(image_uri);
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void uploadProfileCoverPhoto(final Uri uri) {
+    private void uploadProfileCoverPhoto(Uri uri) {
         //show progress
-        progressDialog.show();
+        pd.show();
         //**instead creating saparate function for profile picture and cover photo
         //i am doing work for both in same function
         //
@@ -377,9 +392,10 @@ builder.create().show();
         //path and name of image to be stored in firebase storage
         //foe ex: Users_Profile_Cover_Imgs/image_endfjdaknk.jpg
         //foe ex: Users_Profile_Cover_Imgs/cover_endfjdaknk.jpg
-        String filePathAndName = storagePath + "" + profileOrCoverPhoto + "_" + user.getUid();
+        String filePathAndName = storagePath + ""+ profileOrCoverPhoto + "_" + user.getUid();
         StorageReference storageReference2nd = storageReference.child(filePathAndName);
-        storageReference2nd.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        storageReference2nd.putFile(uri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 //image is upload to storage .now gets its url and store in user's database
@@ -394,7 +410,7 @@ builder.create().show();
                     /*here first paramiter is  profileOrCoverPhoto that has value "image" or "cover"
                     which are keys in users database where url of image will be saved in one of them
 
-                    secound paramiter contains the url og image stored in firebase storage this url will be saved as value
+                    secound paramiter contains the url of image stored in firebase storage this url will be saved as value
                      against key "image" or  "cover"*/
                     results.put(profileOrCoverPhoto, dawonloadUri.toString());
                     databaseReference.child(user.getUid()).updateChildren(results)//updated here
@@ -403,52 +419,55 @@ builder.create().show();
                                 public void onSuccess(Void aVoid) {
                                     //url in database of user is added sucessfully
                                     //change progress dialog
-                                    progressDialog.dismiss();
+                                    pd.dismiss();
                                     Toast.makeText(getActivity(), "image updated", Toast.LENGTH_SHORT).show();
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            progressDialog.dismiss();
+                            //error adding url in database of user
+                            //dismiss progress bar
+                            pd.dismiss();
                             Toast.makeText(getActivity(), "error from update image = " + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
                     //error here
-                    progressDialog.dismiss();
-                    Toast.makeText(getActivity(), "some error occurd from upload image ", Toast.LENGTH_SHORT).show();
+                    pd.dismiss();
+                    Toast.makeText(getActivity(), "some error occurd", Toast.LENGTH_SHORT).show();
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 ////there are some error(s) progressDialog will dismiss here
-                progressDialog.dismiss();
+                pd.dismiss();
                 Toast.makeText(getContext(), "" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
     }
-
     private void pickFromCamera() {
-        //intent of picking image of device camera
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE, "temp pic");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "temp description");
+        //intent of picking image from device camera
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "Temp Pic");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "Temp Description");
         //put image uri
-        image_uri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+        image_uri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         //intent to start camera
-        Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        camera_intent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
-        startActivityForResult(camera_intent, IMAGE_PICK_CAMERA_REQUEST_CODE);
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
+        startActivityForResult(cameraIntent, IMAGE_PIC_CAMERA_CODE);
+    }
+    private void pickFromGallery() {
+//pick from gallery
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        galleryIntent.setType("image/*");
+        startActivityForResult(galleryIntent, IMAGE_PIC_GALLERY_CODE);
     }
 
-    private void pickFromGallery() {
-//intent of picking image from gallery
-        Intent gallery_intent = new Intent(Intent.ACTION_PICK);
-        gallery_intent.setType("image/*");
-        startActivityForResult(gallery_intent, IMAGE_PICK_GALLERY_REQUEST_CODE);
-    }
+
 }
 
 
