@@ -10,4 +10,5 @@ In this project we develop a social media application
 - update profile name,image and phone number.
 - show active users 👤 .
 - search active users 👥 .
+- implement seen delivered and send time.
 - update profile  features using UI.<br/>
