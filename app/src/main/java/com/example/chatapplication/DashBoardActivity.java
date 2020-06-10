@@ -81,6 +81,8 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
             case R.id.nav_users:
                 repleaseFragment(new UsersFragment());
                 return true;
+            case R.id.nav_chat:
+                repleaseFragment(new ChatlistFragment());
         }
         return false;
     }

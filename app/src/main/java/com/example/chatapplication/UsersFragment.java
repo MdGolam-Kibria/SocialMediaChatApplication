@@ -100,7 +100,6 @@ public class UsersFragment extends Fragment {
                 userList.clear();
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {//for get all data from firebase "Users" path children
                     ModelUser modelUser = ds.getValue(ModelUser.class);
-
                     /*
                     condition to fulfil search:-
                     1.user not current user

@@ -1,6 +1,7 @@
 package com.example.chatapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
         //get  Data
+        final String hisUid = userList.get(position).getUid();
         String userImage = userList.get(position).getImage();
         String userName = userList.get(position).getName();
         final String userEmail = userList.get(position).getEmail();
@@ -55,7 +57,15 @@ class AdapterUsers extends RecyclerView.Adapter<AdapterUsers.MyHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, userEmail, Toast.LENGTH_LONG).show();
+                /*
+                click user from userlist to start chating and messaging
+                * start activyty by putting UID of receiver
+                * we will use that UID to identify the user we are gonna chat
+                 */
+
+                Intent intent = new Intent(context,ChatActivity.class);
+                intent.putExtra("hisUid",hisUid);
+                context.startActivity(intent);
             }
         });
     }
