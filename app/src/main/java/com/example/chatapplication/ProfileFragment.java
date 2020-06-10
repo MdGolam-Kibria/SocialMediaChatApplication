@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -46,6 +47,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
 import java.util.HashMap;
 
 import static android.app.Activity.RESULT_OK;
@@ -56,6 +59,7 @@ import static com.google.firebase.storage.FirebaseStorage.getInstance;
  * A simple {@link Fragment} subclass.
  */
 public class ProfileFragment extends Fragment implements View.OnClickListener {
+    Bitmap bitm;
     ImageView avaterIv, coverIv;
     TextView nameTv, emailTv, phoneTv;
     FloatingActionButton fab;
@@ -72,7 +76,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     Uri image_uri;
     //..for chacking profilr or cover photo
     String profileOrCoverPhoto;
-//firebase
+    //firebase
     FirebaseAuth firebaseAuth;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
@@ -81,12 +85,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     StorageReference storageReference;
     //path where storage of user profile and cover photo will be stored.
     String storagePath = "Users_Profile_Cover_Imgs/";
-
-
-
-
-
-
 
 
     public ProfileFragment() {
@@ -173,7 +171,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     }
 
 
-
     private boolean checkStoragePermission() {//for Gallery
         //check if storage permission is enabled or not
         //return true if enabled
@@ -182,9 +179,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 == (PackageManager.PERMISSION_GRANTED);
         return result;
     }
+
     private void requestStoragePermission() {//for Gallery
-       requestPermissions(storagePermission, STORAGE_REQUEST_CODE);
+        requestPermissions(storagePermission, STORAGE_REQUEST_CODE);
     }
+
     private boolean checkCameraPermission() {//for camera
         //check if storage permission is enabled or not
         //return true if enabled
@@ -196,9 +195,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 == (PackageManager.PERMISSION_GRANTED);
         return result && result1;
     }
+
     private void requestCameraPermission() {//for camera
         requestPermissions(cameraPermission, CAMERA_REQUEST_CODE);
     }
+
     private void showEditProfileDialog() {
         String options[] = {"Edit Profile Picture", "Edit Cover Photo", "Edit Name", "Edit Phone"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -268,13 +269,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            //something error here
-                            pd.dismiss();
-                            Toast.makeText(getActivity(), "error update name/phone" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    //something error here
+                                    pd.dismiss();
+                                    Toast.makeText(getActivity(), "error update name/phone" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 } else {
                     Toast.makeText(getActivity(), "please enter your " + key, Toast.LENGTH_SHORT).show();
                 }
@@ -290,7 +291,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private void showImagePicDialog() {///problem here
         //show dialog containing option camera and gallery to pick the image.
-        String options[] = {"Camera","Gallery"};
+        String options[] = {"Camera", "Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pick Image From ");
         builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -304,7 +305,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         pickFromCamera();
                     }
                     pd.setMessage("Updating Profile Pic...");
-                    showImagePicDialog();
+//                    showImagePicDialog();
                 } else if (which == 1) {
                     //gallery clicked
                     pd.setMessage("Editing Cover photo....");
@@ -319,6 +320,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         builder.create().show();
 
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         //this method call when user allow or deny from permission request dialog
@@ -360,19 +362,29 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //this method will be called after picking image from camera or gallery
+//        Uri u = data.getData();
+//        Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+        if (data.getData()==null){
+            Log.d("Data",data.getData().toString());
+        }
+        int j = requestCode;
         if (requestCode == RESULT_OK) {
             if (requestCode == IMAGE_PIC_GALLERY_CODE) {
                 //image is picked from gallery , get uri of image
                 image_uri = data.getData();
+
                 uploadProfileCoverPhoto(image_uri);
             }
             if (requestCode == IMAGE_PIC_CAMERA_CODE) {
                 //image picked from camera , get uri of image
-                uploadProfileCoverPhoto(image_uri);
+                 uploadProfileCoverPhoto(image_uri);
+                Bitmap bitmaps = (Bitmap) data.getExtras().get("data");
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+
 
     private void uploadProfileCoverPhoto(Uri uri) {
         //show progress
@@ -392,53 +404,53 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         //path and name of image to be stored in firebase storage
         //foe ex: Users_Profile_Cover_Imgs/image_endfjdaknk.jpg
         //foe ex: Users_Profile_Cover_Imgs/cover_endfjdaknk.jpg
-        String filePathAndName = storagePath + ""+ profileOrCoverPhoto + "_" + user.getUid();
+        String filePathAndName = storagePath + "" + profileOrCoverPhoto + "_" + user.getUid();
         StorageReference storageReference2nd = storageReference.child(filePathAndName);
         storageReference2nd.putFile(uri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                //image is upload to storage .now gets its url and store in user's database
-                Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-                while (!uriTask.isSuccessful()) ;
-                Uri dawonloadUri = uriTask.getResult();
-                //check if image is uploaded or not and url is received
-                if (uriTask.isSuccessful()) {
-                    //image uploaded
-                    //add/update url in users database
-                    HashMap<String, Object> results = new HashMap<>();
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        //image is upload to storage .now gets its url and store in user's database
+                        Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                        while (!uriTask.isSuccessful()) ;
+                        Uri dawonloadUri = uriTask.getResult();
+                        //check if image is uploaded or not and url is received
+                        if (uriTask.isSuccessful()) {
+                            //image uploaded
+                            //add/update url in users database
+                            HashMap<String, Object> results = new HashMap<>();
                     /*here first paramiter is  profileOrCoverPhoto that has value "image" or "cover"
                     which are keys in users database where url of image will be saved in one of them
 
                     secound paramiter contains the url of image stored in firebase storage this url will be saved as value
                      against key "image" or  "cover"*/
-                    results.put(profileOrCoverPhoto, dawonloadUri.toString());
-                    databaseReference.child(user.getUid()).updateChildren(results)//updated here
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    //url in database of user is added sucessfully
-                                    //change progress dialog
-                                    pd.dismiss();
-                                    Toast.makeText(getActivity(), "image updated", Toast.LENGTH_SHORT).show();
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            //error adding url in database of user
-                            //dismiss progress bar
+                            results.put(profileOrCoverPhoto, dawonloadUri.toString());
+                            databaseReference.child(user.getUid()).updateChildren(results)//updated here
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            //url in database of user is added sucessfully
+                                            //change progress dialog
+                                            pd.dismiss();
+                                            Toast.makeText(getActivity(), "image updated", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            //error adding url in database of user
+                                            //dismiss progress bar
+                                            pd.dismiss();
+                                            Toast.makeText(getActivity(), "error from update image = " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                        } else {
+                            //error here
                             pd.dismiss();
-                            Toast.makeText(getActivity(), "error from update image = " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), "some error occurd", Toast.LENGTH_SHORT).show();
                         }
-                    });
-                } else {
-                    //error here
-                    pd.dismiss();
-                    Toast.makeText(getActivity(), "some error occurd", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 ////there are some error(s) progressDialog will dismiss here
@@ -448,18 +460,22 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         });
 
     }
+
     private void pickFromCamera() {
         //intent of picking image from device camera
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "Temp Pic");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "Temp Description");
-        //put image uri
-        image_uri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        //intent to start camera
+//        ContentValues values = new ContentValues();
+//        values.put(MediaStore.Images.Media.TITLE, "Temp");
+//        values.put(MediaStore.Images.Media.DESCRIPTION, "TempDescription");
+//        //put image uri
+//        image_uri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+//        //intent to start camera
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
-        startActivityForResult(cameraIntent, IMAGE_PIC_CAMERA_CODE);
+        if (cameraIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
+            startActivityForResult(cameraIntent, IMAGE_PIC_CAMERA_CODE);
+        }
     }
+
     private void pickFromGallery() {
 //pick from gallery
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
