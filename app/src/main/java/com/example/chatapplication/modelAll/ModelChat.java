@@ -1,8 +1,10 @@
 package com.example.chatapplication.modelAll;
 
+import com.google.firebase.database.PropertyName;
+
 public class ModelChat {
-    String message,receiver,sender;
-//            ,timestamp;
+    String message, receiver, sender;
+    //            ,timestamp;
     boolean isSeen;
 
     public ModelChat() {
@@ -39,6 +41,7 @@ public class ModelChat {
         this.sender = sender;
     }
 
+    @PropertyName("isSeen")
     public boolean isSeen() {
         return isSeen;
     }
