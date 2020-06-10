@@ -22,6 +22,9 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -482,7 +485,39 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         galleryIntent.setType("image/*");
         startActivityForResult(galleryIntent, IMAGE_PIC_GALLERY_CODE);
     }
+    private void checkUserStatus() {//check user sign in or not and accessibility
+        FirebaseUser user = firebaseAuth.getCurrentUser();//get current user
+        if (user != null) {
+            //user signed in stay here
+//            mProfileTv.setText(user.getEmail());
+        } else {
+            //user not signed in
+            startActivity(new Intent(getActivity(), MainActivity.class));
+            getActivity().finish();
+        }
+    }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);//to show menu option in fragment
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {//for inflate option menu
+        inflater.inflate(R.menu.menu, menu);
+        super.onCreateOptionsMenu(menu,inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {//for option item selection handle "logout"
+        int id = item.getItemId();
+        if (id == R.id.actionLogout) {
+            firebaseAuth.signOut();
+            checkUserStatus();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 }
 

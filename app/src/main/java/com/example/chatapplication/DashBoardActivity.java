@@ -69,22 +69,6 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {//for inflate option menu
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {//for option item selection handle "logout"
-        int id = item.getItemId();
-        if (id == R.id.actionLogout) {
-            firebaseAuth.signOut();
-            checkUserStatus();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
 
