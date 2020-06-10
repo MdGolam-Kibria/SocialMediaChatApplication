@@ -11,4 +11,5 @@ In this project we develop a social media application
 - show active users 👤 .
 - search active users 👥 .
 - implement seen delivered and send time.
+- delete message.
 - update profile  features using UI.<br/>
