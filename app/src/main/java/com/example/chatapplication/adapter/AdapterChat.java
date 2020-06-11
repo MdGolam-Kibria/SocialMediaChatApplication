@@ -18,7 +18,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,16 +53,15 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
         String message = chatList.get(position).getMessage();
-       // String timeStamp = chatList.get(position).getTimestamp();
+        String timeStamp = chatList.get(position).getTimestamp();
 
-//        //convert time stamp to dd/mm/yy hh:mm  am/pm
-//        Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
-//        //calendar.setTimeInMillis(Long.parseLong(timeStamp));
-//        String dateTime = DateFormat.format("dd/MM/yyyy hh:mm:aa", calendar).toString();
-
+//        //convert time stamp to dd/MM/yyyy HH:mm:ss
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        //System.out.println(formatter.format(date));
         //setData
         holder.messageTv.setText(message);
-       // holder.timeTv.setText("dateTime");
+        holder.timeTv.setText(formatter.format(date));
         try {
             Picasso.get().load(imageUrl).into(holder.profileIv);
         } catch (Exception e) {
@@ -96,13 +97,12 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
 
     class MyHolder extends RecyclerView.ViewHolder {
         ImageView profileIv;
-        TextView messageTv, isSeenTv;
-//        timeTv
+        TextView messageTv, isSeenTv,timeTv;
         public MyHolder(@NonNull View itemView) {
             super(itemView);
             profileIv = itemView.findViewById(R.id.profileIvv);
             messageTv = itemView.findViewById(R.id.messageTvv);
-           // timeTv = itemView.findViewById(R.id.timeTv);
+           timeTv = itemView.findViewById(R.id.timeTv);
             isSeenTv = itemView.findViewById(R.id.isSeenTv);
         }
     }

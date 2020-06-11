@@ -31,7 +31,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -197,11 +199,14 @@ public class ChatActivity extends AppCompatActivity {
          */
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         //String timeStamp = String.valueOf(System.currentTimeMillis());
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        String timeStamp = formatter.format(date);
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("sender", myUid);
         hashMap.put("receiver", hisUid);
         hashMap.put("message", message);
-        //hashMap.put("timestamp", timeStamp);
+        hashMap.put("timestamp", timeStamp);
         hashMap.put("isSeen", false);
         databaseReference.child("Chats").push().setValue(hashMap);
         //reset editText after sending message

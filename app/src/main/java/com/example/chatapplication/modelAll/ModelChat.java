@@ -4,17 +4,26 @@ import com.google.firebase.database.PropertyName;
 
 public class ModelChat {
     String message, receiver, sender;
-    //            ,timestamp;
+    String timestamp;
     boolean isSeen;
 
     public ModelChat() {
     }
 
-    public ModelChat(String message, String receiver, String sender, boolean isSeen) {
+    public ModelChat(String message, String receiver,String timestamp, String sender, boolean isSeen) {
         this.message = message;
         this.receiver = receiver;
+        this.timestamp = timestamp;
         this.sender = sender;
         this.isSeen = isSeen;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getMessage() {
@@ -46,6 +55,7 @@ public class ModelChat {
         return isSeen;
     }
 
+    @PropertyName("isSeen")
     public void setSeen(boolean seen) {
         isSeen = seen;
     }
