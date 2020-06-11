@@ -13,5 +13,5 @@ In this project we develop a social media application
 - search active users 👥 .
 - implement seen delivered and send time.
 - delete message.
--Next step is implement image in database after conberting Base 64, and show it 
+-Next step is implement image in database after conberting Base 64, and show it in user profile and everywhere where we need to implement user image.
 - update profile  features using UI.<br/>
