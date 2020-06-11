@@ -54,14 +54,9 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
         String message = chatList.get(position).getMessage();
         String timeStamp = chatList.get(position).getTimestamp();
-
-//        //convert time stamp to dd/MM/yyyy HH:mm:ss
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        Date date = new Date();
-        //System.out.println(formatter.format(date));
         //setData
         holder.messageTv.setText(message);
-        holder.timeTv.setText(formatter.format(date));
+        holder.timeTv.setText(timeStamp);
         try {
             Picasso.get().load(imageUrl).into(holder.profileIv);
         } catch (Exception e) {
