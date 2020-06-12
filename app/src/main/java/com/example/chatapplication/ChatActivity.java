@@ -136,7 +136,6 @@ public class ChatActivity extends AppCompatActivity {
         });
 
 
-
     }
 
     private void seenMessage() {
@@ -146,9 +145,9 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     ModelChat chat = ds.getValue(ModelChat.class);
-                    if (chat.getReceiver().equals(myUid) && chat.getSender().equals(hisUid)){
-                        HashMap<String,Object> hasSeenHasMap = new HashMap<>();
-                        hasSeenHasMap.put("isSeen",true);
+                    if (chat.getReceiver().equals(myUid) && chat.getSender().equals(hisUid)) {
+                        HashMap<String, Object> hasSeenHasMap = new HashMap<>();
+                        hasSeenHasMap.put("isSeen", true);
                         ds.getRef().updateChildren(hasSeenHasMap);
                     }
                 }

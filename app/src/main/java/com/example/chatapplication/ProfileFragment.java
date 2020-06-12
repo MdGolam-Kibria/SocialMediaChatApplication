@@ -7,10 +7,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +31,8 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.chatapplication.convertImage.BitmapImageToString;
+import com.example.chatapplication.convertImage.StringImageCodeToBitmap;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -45,6 +49,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
 import static android.app.Activity.RESULT_OK;
@@ -55,7 +60,7 @@ import static com.google.firebase.storage.FirebaseStorage.getInstance;
  * A simple {@link Fragment} subclass.
  */
 public class ProfileFragment extends Fragment implements View.OnClickListener {
-    Bitmap bitm;
+    Bitmap bitmap;
     ImageView avaterIv, coverIv;
     TextView nameTv, emailTv, phoneTv;
     FloatingActionButton fab;
@@ -81,6 +86,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     StorageReference storageReference;
     //path where storage of user profile and cover photo will be stored.
     String storagePath = "Users_Profile_Cover_Imgs/";
+    private String myUid;
 
 
     public ProfileFragment() {
@@ -132,19 +138,25 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     phoneTv.setText(phone);
                     try {
 
-                        Picasso.get().load(image).into(avaterIv);
-
-                    } catch (Exception e) {
-                        Picasso.get().load(R.drawable.profile_icon).into(avaterIv);
-                    }
-
-                    try {
-
                         Picasso.get().load(cover).into(coverIv);
 
                     } catch (Exception e) {
 
                     }
+                    try {
+
+//          Bitmap convertImage =  StringImageCodeToBitmap.jsonimageConvertTOBitmap(userImage);
+                     Bitmap bitmap = StringImageCodeToBitmap.jsonimageConvertTOBitmap(image);
+//                        byte[] images = image.getBytes();
+//                        Bitmap bitmap = BitmapFactory.decodeByteArray(images, 0, images.length);
+                         avaterIv.setImageBitmap(bitmap);
+                        /*Picasso.get().load(images).into(avaterIv);*/
+
+                    } catch (Exception e) {
+                        Picasso.get().load(R.drawable.profile_icon).into(avaterIv);
+                    }
+
+
                 }
             }
 
@@ -298,7 +310,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     if (!checkCameraPermission()) {
                         requestCameraPermission();
                     } else {
-                        pickFromCamera();
+                        pickFromCameraSnd();
                     }
                     pd.setMessage("Updating Profile Pic...");
 //                    showImagePicDialog();
@@ -358,12 +370,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //this method will be called after picking image from camera or gallery
-//        Uri u = data.getData();
-//        Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-        if (data.getData()==null){
-            Log.d("Data",data.getData().toString());
+        ////try
+
+        if (requestCode == IMAGE_PIC_CAMERA_CODE) {
+            bitmap = (Bitmap) data.getExtras().get("data");
+            uploadProfilePhoto(bitmap);
+
         }
-        int j = requestCode;
+
         if (requestCode == RESULT_OK) {
             if (requestCode == IMAGE_PIC_GALLERY_CODE) {
                 //image is picked from gallery , get uri of image
@@ -371,16 +385,38 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                 uploadProfileCoverPhoto(image_uri);
             }
-            if (requestCode == IMAGE_PIC_CAMERA_CODE) {
-                //image picked from camera , get uri of image
-                 uploadProfileCoverPhoto(image_uri);
-                Bitmap bitmaps = (Bitmap) data.getExtras().get("data");
-            }
+
         }
-        super.onActivityResult(requestCode, resultCode, data);
+
+    }
+
+    @Override
+    public void onStart() {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if (user != null) {
+            myUid = user.getUid();
+        }
+        super.onStart();
     }
 
 
+    private void uploadProfilePhoto(Bitmap bitmap) {
+
+        //path to store user data named "Users";
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("image", BitmapImageToString.convert(bitmap));
+        databaseReference.child(user.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(getActivity(), "image uploaded", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getActivity(), "image upload Failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     private void uploadProfileCoverPhoto(Uri uri) {
         //show progress
@@ -457,6 +493,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     }
 
+
+    private void pickFromCameraSnd() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE_SECURE);
+        startActivityForResult(takePictureIntent, IMAGE_PIC_CAMERA_CODE);
+    }
+
     private void pickFromCamera() {
         //intent of picking image from device camera
 //        ContentValues values = new ContentValues();
@@ -467,7 +509,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 //        //intent to start camera
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (cameraIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
             startActivityForResult(cameraIntent, IMAGE_PIC_CAMERA_CODE);
         }
     }
@@ -478,6 +520,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         galleryIntent.setType("image/*");
         startActivityForResult(galleryIntent, IMAGE_PIC_GALLERY_CODE);
     }
+
     private void checkUserStatus() {//check user sign in or not and accessibility
         FirebaseUser user = firebaseAuth.getCurrentUser();//get current user
         if (user != null) {
@@ -499,7 +542,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {//for inflate option menu
         inflater.inflate(R.menu.menu, menu);
-        super.onCreateOptionsMenu(menu,inflater);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -511,7 +554,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
         return super.onOptionsItemSelected(item);
     }
-
 }
 
 
