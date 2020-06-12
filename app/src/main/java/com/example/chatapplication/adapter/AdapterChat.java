@@ -1,13 +1,11 @@
 package com.example.chatapplication.adapter;
 
 import android.content.Context;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,11 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
     private static final int MSG_TYPE_LEFT = 0;
@@ -73,7 +67,6 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
             holder.isSeenTv.setVisibility(View.GONE);
         }
     }
-
     @Override
     public int getItemCount() {
         return chatList.size();
