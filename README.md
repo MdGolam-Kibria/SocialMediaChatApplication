@@ -16,4 +16,6 @@ In this project we develop a social media application
 - delete message.
 - show relatime user typing or not
 - implement active or not.
+- implement Notifications <br/>
+              *when a sender send sms to another user user get a notification
 - update profile  features using UI.<br/>
