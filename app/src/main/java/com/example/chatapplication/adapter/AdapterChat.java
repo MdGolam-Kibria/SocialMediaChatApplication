@@ -115,7 +115,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final MediaPlayer mediaPlayer  =MediaPlayer.create(context,R.raw.send);
+                final MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.send);
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     /*if you want to allow sender to delete only his message the compare sender value with current user uId
                     if its matches means... its the message of sender that is trying to delete */
@@ -125,7 +125,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
                             2.set the value of message like "This message is deleted" so lets go
                      */
                         //  1.remove the message from chats and here don't have any sms.
-                                         //ds.getRef().removeValue();////if you want try this line aganist below three line code happy coding
+                                 //ds.getRef().removeValue();////if you want try this line aganist below three line code happy coding
                         // 2.delete message and set the value of message like "This message is deleted".
                         HashMap<String, Object> map = new HashMap<>();
                         map.put("message", "This message is deleted");
