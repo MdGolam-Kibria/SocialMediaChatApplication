@@ -46,7 +46,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:19.1.1'
     implementation 'com.github.mohammadatif:CircularImageView:1.0.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
-
+//for custom Toast
+    implementation 'com.github.Shashank02051997:FancyToast-Android:0.1.6'
 
 
 }

@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -101,13 +103,20 @@ public class ChatActivity extends AppCompatActivity {
                     //get data
                     String name = "" + ds.child("name").getValue();
                     hisImage = "" + ds.child("image").getValue();
-                    //get value of oline status
-                    String onlineStatus = ""+ds.child("onlineStatus").getValue();
-                    if (onlineStatus.equals("online")){
-                        userStatusTv.setText(onlineStatus);
-                    }else {//jodi online na hoi tahole last seen er time ta firebase theke ekhane dekhabe.
-                        userStatusTv.setText(onlineStatus);
+                    String typingStatus = "" + ds.child("typingTo").getValue();
+                    //check typing status
+                    if (typingStatus.equals(myUid)) {
+                        userStatusTv.setText(name + " Typing now....");
+                    } else {
+                        //get value of oline status
+                        String onlineStatus = "" + ds.child("onlineStatus").getValue();
+                        if (onlineStatus.equals("online")) {
+                            userStatusTv.setText(onlineStatus);
+                        } else {//jodi online na hoi tahole last seen er time ta firebase theke ekhane dekhabe.
+                            userStatusTv.setText(onlineStatus);
+                        }
                     }
+
 
                     //set data
                     nameTv.setText(name);
@@ -129,6 +138,29 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+        //check editText change listener
+        messageEt.addTextChangedListener(new TextWatcher() {//for check user currently typing or not
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().trim().length() == 0) {//if don't have any data in edit text
+                    checkTypingStatus("noOneTyping");
+                } else {
+                    checkTypingStatus(hisUid);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
         readMessage();//in oncreate view
         seenMessage();//in oncreate view
 
@@ -239,13 +271,23 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private void checkOnlineStatus(String status){
+
+    private void checkOnlineStatus(String status) {
         DatabaseReference dRef = FirebaseDatabase.getInstance().getReference("Users").child(myUid);
-        HashMap<String,Object> map = new HashMap<>();
-        map.put("onlineStatus",status);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("onlineStatus", status);
         //update value of online status of current user.
         dRef.updateChildren(map);
     }
+
+    private void checkTypingStatus(String typing) {//check typing status user currently typing or not.
+        DatabaseReference dRef = FirebaseDatabase.getInstance().getReference("Users").child(myUid);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("typingTo", typing);
+        //update value of online status of current user.
+        dRef.updateChildren(map);
+    }
+
     @Override
     protected void onStart() {
         checkUserStatus();
@@ -260,6 +302,7 @@ public class ChatActivity extends AppCompatActivity {
         Date date = new Date();
         String timeStamp = formatter.format(date);
         checkOnlineStatus(timeStamp);
+        checkTypingStatus("noOneTyping");
         super.onPause();
         userRefForSeen.removeEventListener(seenListener);
     }

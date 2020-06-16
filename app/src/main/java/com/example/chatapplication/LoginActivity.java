@@ -312,6 +312,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 hashMap.put("uid",uid);
                                 hashMap.put("name","");
                                 hashMap.put("onlineStatus","online");// will add later
+                                hashMap.put("typingTo","noOne");// will add later
                                 hashMap.put("password","");
                                 hashMap.put("image","");
                                 hashMap.put("cover","");
