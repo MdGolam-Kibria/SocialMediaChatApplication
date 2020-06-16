@@ -14,4 +14,6 @@ In this project we develop a social media application
 - convert profile image Base 64 and add/update profile picture.
 - implement seen delivered and send time.
 - delete message.
+- show relatime user typing or not
+- implement active or not.
 - update profile  features using UI.<br/>
