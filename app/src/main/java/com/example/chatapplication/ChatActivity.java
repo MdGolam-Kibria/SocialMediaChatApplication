@@ -13,6 +13,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,10 +23,17 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.chatapplication.adapter.AdapterChat;
 import com.example.chatapplication.convertImage.StringImageCodeToBitmap;
 import com.example.chatapplication.modelAll.ModelChat;
+import com.example.chatapplication.notificatons.ApiService;
+import com.example.chatapplication.notificatons.Client;
+import com.example.chatapplication.notificatons.Data;
+import com.example.chatapplication.notificatons.Response;
+import com.example.chatapplication.notificatons.Sender;
+import com.example.chatapplication.notificatons.Token;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -44,6 +52,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+
 public class ChatActivity extends AppCompatActivity {
     Toolbar toolbar;
     RecyclerView recyclerView;
@@ -59,7 +70,8 @@ public class ChatActivity extends AppCompatActivity {
     DatabaseReference userRefForSeen;
     List<ModelChat> chatList;
     AdapterChat adapterChat;
-
+    ApiService apiService;
+    boolean notify = false;
 
     String hisUid;
     String myUid;
@@ -82,6 +94,9 @@ public class ChatActivity extends AppCompatActivity {
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
+
+
+        apiService = Client.getRetrofit("https://fcm.googleapis.com/").create(ApiService.class);
   /*
         On clicking user from users list we have passed that's user UID using intent
         *so get that UID here to get the profile picture, name and start chat with that
@@ -170,6 +185,7 @@ public class ChatActivity extends AppCompatActivity {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                notify = true;
                 String message = messageEt.getText().toString().trim();
                 if (TextUtils.isEmpty(message)) {
                     messageEt.setError("message is empty");
@@ -178,6 +194,8 @@ public class ChatActivity extends AppCompatActivity {
                 } else {
                     sendMessage(message);
                 }
+                //reset editText after sending message
+                messageEt.setText("");
             }
         });
 
@@ -232,7 +250,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMessage(String message) {
+    private void sendMessage(final String message) {
 
         /*
         "Chats" node will be created that will contains all chats
@@ -254,8 +272,61 @@ public class ChatActivity extends AppCompatActivity {
         hashMap.put("timestamp", timeStamp);
         hashMap.put("isSeen", false);
         databaseReference.child("Chats").push().setValue(hashMap);
-        //reset editText after sending message
-        messageEt.setText("");
+
+
+        DatabaseReference drefer = FirebaseDatabase.getInstance().getReference("Users").child(myUid);
+        drefer.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Log.d("MyTag", ds.getValue(String.class));
+                  //  Log.d("sms",ds.child("name").getValue(String.class));
+                    //ModelUser user = ds.getValue(ModelUser.class);
+                    if (notify) {
+                        sendNotification(hisUid, ds.child("name").getValue(String.class), message);//problem here can't show user name get null
+                    }
+                    notify = false;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void sendNotification(final String hisUid, final String name, final String message) {
+        DatabaseReference allToken = FirebaseDatabase.getInstance().getReference("Tokens");
+        Query query = allToken.orderByKey().equalTo(hisUid);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Token token = ds.getValue(Token.class);
+                    Data data = new Data(myUid, name + ";" + message, "New Message", hisUid, R.drawable.ic_face_img);
+                    Sender sender = new Sender(data, token.getToken());
+                    apiService.sendNotification(sender)
+                            .enqueue(new Callback<Response>() {
+                                @Override
+                                public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                                    Toast.makeText(ChatActivity.this, "" + response.message(), Toast.LENGTH_LONG).show();
+                                }
+
+                                @Override
+                                public void onFailure(Call<Response> call, Throwable t) {
+
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void checkUserStatus() {//check user sign in or not and accessibility

@@ -8,21 +8,27 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.chatapplication.notificatons.Token;
 import com.example.chatapplication.util.UseUtil;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class DashBoardActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
     FirebaseAuth firebaseAuth;
     //    TextView mProfileTv;
     ActionBar actionBar;
     BottomNavigationView navigationView;
+    String mUID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,22 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
 
         actionBar = getSupportActionBar();
         actionBar.setTitle("Profile");
+        checkUserStatus();
+        //updateToken
+        updateToken(FirebaseInstanceId.getInstance().getToken());
+    }
+
+    @Override
+    protected void onResume() {
+        checkUserStatus();
+        super.onResume();
+    }
+
+    private void updateToken(String token) {
+        DatabaseReference df = FirebaseDatabase.getInstance().getReference("Tokens");
+        Token mToken = new Token(token);
+        df.child(mUID).setValue(mToken);
+      // updateToken(FirebaseInstanceId.getInstance().getToken());
 
     }
 
@@ -54,6 +76,12 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
         if (user != null) {
             //user signed in stay here
 //            mProfileTv.setText(user.getEmail());
+            mUID = user.getUid();//for get current userId
+            //save user id of currently signed in user in  SharedPreferences.
+            SharedPreferences sp = getSharedPreferences("SP_USER", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("Current_USERID", mUID);
+            editor.apply();
         } else {
             //user not signed in
             startActivity(new Intent(DashBoardActivity.this, MainActivity.class));
