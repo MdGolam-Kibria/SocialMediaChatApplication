@@ -106,6 +106,7 @@ public class ResisterActivity extends AppCompatActivity implements View.OnClickL
                             hashMap.put("email",email);
                             hashMap.put("uid",uid);
                             hashMap.put("name","");// will add later
+                            hashMap.put("onlineStatus","online");// will add later
                             hashMap.put("phone","");// will add later
                             hashMap.put("image","");// will add later
                             hashMap.put("cover","");// will add later

@@ -7,8 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.chatapplication.adapter.AdapterChat;
+import com.example.chatapplication.convertImage.StringImageCodeToBitmap;
 import com.example.chatapplication.modelAll.ModelChat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,9 +36,11 @@ import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class ChatActivity extends AppCompatActivity {
     Toolbar toolbar;
@@ -96,12 +101,21 @@ public class ChatActivity extends AppCompatActivity {
                     //get data
                     String name = "" + ds.child("name").getValue();
                     hisImage = "" + ds.child("image").getValue();
+                    //get value of oline status
+                    String onlineStatus = ""+ds.child("onlineStatus").getValue();
+                    if (onlineStatus.equals("online")){
+                        userStatusTv.setText(onlineStatus);
+                    }else {//jodi online na hoi tahole last seen er time ta firebase theke ekhane dekhabe.
+                        userStatusTv.setText(onlineStatus);
+                    }
 
                     //set data
                     nameTv.setText(name);
                     try {
                         //image received set it to imageview in toolbar
-                        Picasso.get().load(hisImage).placeholder(R.drawable.ic_default).into(profileIv);
+                        //Picasso.get().load(hisImage).placeholder(R.drawable.ic_default).into(profileIv);
+                        Bitmap bitmap = StringImageCodeToBitmap.jsonimageConvertTOBitmap(hisImage);
+                        profileIv.setImageBitmap(bitmap);
 
                     } catch (Exception e) {
                         Picasso.get().load(R.drawable.ic_face_img).into(profileIv);
@@ -225,16 +239,36 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    private void checkOnlineStatus(String status){
+        DatabaseReference dRef = FirebaseDatabase.getInstance().getReference("Users").child(myUid);
+        HashMap<String,Object> map = new HashMap<>();
+        map.put("onlineStatus",status);
+        //update value of online status of current user.
+        dRef.updateChildren(map);
+    }
     @Override
     protected void onStart() {
         checkUserStatus();
+        //set online status
+        checkOnlineStatus("online");
         super.onStart();
     }
 
     @Override
     protected void onPause() {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        String timeStamp = formatter.format(date);
+        checkOnlineStatus(timeStamp);
         super.onPause();
         userRefForSeen.removeEventListener(seenListener);
+    }
+
+    @Override
+    protected void onResume() {
+        //set Online status
+        checkOnlineStatus("online");
+        super.onResume();
     }
 
     @Override

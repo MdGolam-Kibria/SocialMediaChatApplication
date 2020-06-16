@@ -7,13 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,7 +46,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
 import static android.app.Activity.RESULT_OK;
@@ -65,6 +61,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     TextView nameTv, emailTv, phoneTv;
     FloatingActionButton fab;
     ProgressDialog pd;
+    //
+    public static final int IMAGE_PIC_CAMERA_CODE_for_profile_pic = 1;
+    public static final int IMAGE_PIC_CAMERA_CODE_for_coverPhoto = 2;
     //permission contains
     public static final int CAMERA_REQUEST_CODE = 100;
     public static final int STORAGE_REQUEST_CODE = 200;
@@ -132,24 +131,25 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     String phone = "" + ds.child("phone").getValue();
                     String image = "" + ds.child("image").getValue();
                     String cover = "" + ds.child("cover").getValue();
-                    Toast.makeText(getActivity(), "" + dataSnapshot.child("email").getValue(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getActivity(), "" + dataSnapshot.child("email").getValue(), Toast.LENGTH_SHORT).show();
                     nameTv.setText(name);
                     emailTv.setText(email);
                     phoneTv.setText(phone);
                     try {
-
-                        Picasso.get().load(cover).into(coverIv);
+                        Bitmap bitmap = StringImageCodeToBitmap.jsonimageConvertTOBitmap(cover);
+                        coverIv.setImageBitmap(bitmap);
 
                     } catch (Exception e) {
+                        //Picasso.get().load(cover).into(coverIv);
 
                     }
                     try {
 
 //          Bitmap convertImage =  StringImageCodeToBitmap.jsonimageConvertTOBitmap(userImage);
-                     Bitmap bitmap = StringImageCodeToBitmap.jsonimageConvertTOBitmap(image);
+                        Bitmap bitmap = StringImageCodeToBitmap.jsonimageConvertTOBitmap(image);
 //                        byte[] images = image.getBytes();
 //                        Bitmap bitmap = BitmapFactory.decodeByteArray(images, 0, images.length);
-                         avaterIv.setImageBitmap(bitmap);
+                        avaterIv.setImageBitmap(bitmap);
                         /*Picasso.get().load(images).into(avaterIv);*/
 
                     } catch (Exception e) {
@@ -219,12 +219,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     //edit profile clicked
                     pd.setMessage("Updating Profile Pic...");
                     profileOrCoverPhoto = "image";//changing profile picture make sure to assign same value.
-                    showImagePicDialog();
+                    showImagePicDialog(which);
                 } else if (which == 1) {
                     // Edit Cover Photo click
                     pd.setMessage("Updating Cover photo....");
                     profileOrCoverPhoto = "cover";//changing profile picture make sure to assign same value.
-                    showImagePicDialog();
+                    showImagePicDialog(which);
                 } else if (which == 2) {
                     // Edit name click
                     pd.setMessage("Updating name....");
@@ -297,7 +297,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         builder.create().show();
     }
 
-    private void showImagePicDialog() {///problem here
+    private void showImagePicDialog(int which) {///problem here
         //show dialog containing option camera and gallery to pick the image.
         String options[] = {"Camera", "Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -310,7 +310,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     if (!checkCameraPermission()) {
                         requestCameraPermission();
                     } else {
-                        pickFromCameraSnd();
+                        pickFromCameraSnd(which);
                     }
                     pd.setMessage("Updating Profile Pic...");
 //                    showImagePicDialog();
@@ -372,11 +372,16 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         //this method will be called after picking image from camera or gallery
         ////try
 
-        if (requestCode == IMAGE_PIC_CAMERA_CODE) {
+        if (requestCode == IMAGE_PIC_CAMERA_CODE_for_profile_pic) {//by camera
             bitmap = (Bitmap) data.getExtras().get("data");
-            uploadProfilePhoto(bitmap);
-
+            uploadProfilePhoto(bitmap, "profilePic");
         }
+        if (requestCode==IMAGE_PIC_CAMERA_CODE_for_coverPhoto){
+            ///later
+            bitmap = (Bitmap) data.getExtras().get("data");
+            uploadProfilePhoto(bitmap,"coverPhoto");
+        }
+
 
         if (requestCode == RESULT_OK) {
             if (requestCode == IMAGE_PIC_GALLERY_CODE) {
@@ -400,22 +405,38 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     }
 
 
-    private void uploadProfilePhoto(Bitmap bitmap) {
+    private void uploadProfilePhoto(Bitmap bitmap, String profileOrCoverPhoto) {
 
         //path to store user data named "Users";
         HashMap<String, Object> map = new HashMap<>();
-        map.put("image", BitmapImageToString.convert(bitmap));
-        databaseReference.child(user.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Toast.makeText(getActivity(), "image uploaded", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getActivity(), "image upload Failed", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (profileOrCoverPhoto.equals("profilePic")){//for update profile pic
+            map.put("image", BitmapImageToString.convert(bitmap));
+            databaseReference.child(user.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(getActivity(), "profile pic updated", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getActivity(), "profile pic Failed "+ e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        if (profileOrCoverPhoto.equals("coverPhoto")){//for update cover photo
+            map.put("cover", BitmapImageToString.convert(bitmap));
+            databaseReference.child(user.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(getActivity(), "cover photo updated", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getActivity(), "image upload Failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void uploadProfileCoverPhoto(Uri uri) {
@@ -494,9 +515,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     }
 
 
-    private void pickFromCameraSnd() {
+    private void pickFromCameraSnd(int which) {
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE_SECURE);
-        startActivityForResult(takePictureIntent, IMAGE_PIC_CAMERA_CODE);
+        if (which == 0) {
+            startActivityForResult(takePictureIntent, IMAGE_PIC_CAMERA_CODE_for_profile_pic);
+        } if (which==1){
+            startActivityForResult(takePictureIntent, IMAGE_PIC_CAMERA_CODE_for_coverPhoto);
+        }
     }
 
     private void pickFromCamera() {
