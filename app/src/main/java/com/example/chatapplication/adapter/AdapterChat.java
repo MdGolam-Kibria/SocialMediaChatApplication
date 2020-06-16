@@ -115,6 +115,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final MediaPlayer mediaPlayer  =MediaPlayer.create(context,R.raw.send);
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     /*if you want to allow sender to delete only his message the compare sender value with current user uId
                     if its matches means... its the message of sender that is trying to delete */
@@ -129,7 +130,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
                         HashMap<String, Object> map = new HashMap<>();
                         map.put("message", "This message is deleted");
                         ds.getRef().updateChildren(map);
-
+                        mediaPlayer.start();
                         FancyToast.makeText(context, "Message Deleted", FancyToast.LENGTH_LONG, FancyToast.SUCCESS, true);
                     } else {
                         FancyToast.makeText(context, "You Can Delete Only Your Message", FancyToast.LENGTH_LONG, FancyToast.WARNING, true);
