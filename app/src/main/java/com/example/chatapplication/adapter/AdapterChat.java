@@ -2,6 +2,7 @@ package com.example.chatapplication.adapter;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,6 +129,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
                         HashMap<String, Object> map = new HashMap<>();
                         map.put("message", "This message is deleted");
                         ds.getRef().updateChildren(map);
+
                         FancyToast.makeText(context, "Message Deleted", FancyToast.LENGTH_LONG, FancyToast.SUCCESS, true);
                     } else {
                         FancyToast.makeText(context, "You Can Delete Only Your Message", FancyToast.LENGTH_LONG, FancyToast.WARNING, true);
