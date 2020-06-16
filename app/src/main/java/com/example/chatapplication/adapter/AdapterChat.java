@@ -125,7 +125,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
                             2.set the value of message like "This message is deleted" so lets go
                      */
                         //  1.remove the message from chats and here don't have any sms.
-                                         //ds.getRef().removeValue();//
+                                         //ds.getRef().removeValue();////if you want try this line aganist below three line code happy coding
                         // 2.delete message and set the value of message like "This message is deleted".
                         HashMap<String, Object> map = new HashMap<>();
                         map.put("message", "This message is deleted");
