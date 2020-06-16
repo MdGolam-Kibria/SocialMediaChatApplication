@@ -68,9 +68,9 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
             Picasso.get().load(R.drawable.common_google_signin_btn_text_dark_normal_background).into(holder.profileIv);
         }
 
-        holder.messageLayout.setOnClickListener(new View.OnClickListener() {//click to show message delete dialog
+        holder.messageLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onLongClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("Delete");
                 builder.setMessage("Are You Sure To Delete This Message");
@@ -86,7 +86,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
                     }
                 });
                 builder.create().show();
-
+                return false;
             }
         });
         //set seen/delivered status of message
