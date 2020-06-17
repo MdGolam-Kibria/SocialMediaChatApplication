@@ -19,3 +19,16 @@ In this project we develop a social media application
 - implement Notifications <br/>
               *when a sender send sms to another user user get a notification
 - update profile  features using UI.<br/>
+
+
+
+```javascript
+// code away!
+
+let generateProject = project => {
+  let code = [];
+  for (let js = 0; js < project.length; js++) {
+    code.push(js);
+  }
+};
+```
