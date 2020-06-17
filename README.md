@@ -23,7 +23,7 @@ In this project we develop a social media application
 
 
 ```java
-// code away!
+// For Firebase Device to Device notifications.
 
 At first connect your app into firebase database ,clould messaging after all follow the below proccess
 
