@@ -280,7 +280,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Log.d("MyTag", ds.getValue(String.class));
-                  //  Log.d("sms",ds.child("name").getValue(String.class));
+                    //  Log.d("sms",ds.child("name").getValue(String.class));
                     //ModelUser user = ds.getValue(ModelUser.class);
                     if (notify) {
                         sendNotification(hisUid, ds.child("name").getValue(String.class), message);//problem here can't show user name get null
@@ -298,6 +298,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendNotification(final String hisUid, final String name, final String message) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        final String timeStamp = formatter.format(date);
+
         DatabaseReference allToken = FirebaseDatabase.getInstance().getReference("Tokens");
         Query query = allToken.orderByKey().equalTo(hisUid);
         query.addValueEventListener(new ValueEventListener() {
@@ -305,7 +309,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Token token = ds.getValue(Token.class);
-                    Data data = new Data(myUid, name + ";" + message, "New Message", hisUid, R.drawable.ic_face_img);
+                    Data data = new Data(myUid, name + ";" + message, timeStamp, hisUid, R.drawable.ic_face_img);
                     Sender sender = new Sender(data, token.getToken());
                     apiService.sendNotification(sender)
                             .enqueue(new Callback<Response>() {

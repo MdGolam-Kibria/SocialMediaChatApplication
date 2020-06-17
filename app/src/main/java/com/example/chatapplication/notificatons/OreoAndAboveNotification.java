@@ -28,7 +28,7 @@ public class OreoAndAboveNotification extends ContextWrapper {
         NotificationChannel notificationChannel = new NotificationChannel(ID, NAME, NotificationManager.IMPORTANCE_DEFAULT);
         notificationChannel.enableLights(true);
         notificationChannel.enableVibration(true);
-        notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
         getNotificationManager().createNotificationChannel(notificationChannel);
     }
 
@@ -45,6 +45,8 @@ public class OreoAndAboveNotification extends ContextWrapper {
                 .setContentIntent(pIntent)
                 .setContentTitle(title)
                 .setContentText(body)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setCategory(Notification.CATEGORY_MESSAGE)
                 .setSound(soundUri)
                 .setAutoCancel(true)
                 .setSmallIcon(Integer.parseInt(icon));

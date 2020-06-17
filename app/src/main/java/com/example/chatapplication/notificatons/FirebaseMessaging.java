@@ -60,6 +60,8 @@ public class FirebaseMessaging extends FirebaseMessagingService {
                 .setSmallIcon(Integer.parseInt(icon))
                 .setContentText(body)
                 .setContentTitle(title)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setCategory(Notification.CATEGORY_MESSAGE)
                 .setAutoCancel(true)
                 .setSound(defSoundtUri)
                 .setContentIntent(pIntent);
