@@ -3,14 +3,14 @@ In this project we develop a social media application
 ### Social media application../Chat application here all features of the project below
 - backend Firebase backend system.
 - authentication and authorization using user email
-- Forgot password recovery system using user email address.
+- Forgot password recovery system using user email address with Gmail account if user have a valid Gmail account with this account.
 - user based chat.
 - group chat.
 - Google Sign in method.
 - add user based profile and chatting access 😊
 - update profile name,image and phone number.
 - show active users 👤 .
-- search active users 👥 .-
+- search active users 👥  by her name or email.-
 - convert profile image Base 64 and add/update profile picture.
 - implement seen delivered and send time.
 - delete message.
