@@ -1,5 +1,6 @@
 package com.example.chatapplication.notificatons;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -28,7 +29,7 @@ public class OreoAndAboveNotification extends ContextWrapper {
         NotificationChannel notificationChannel = new NotificationChannel(ID, NAME, NotificationManager.IMPORTANCE_DEFAULT);
         notificationChannel.enableLights(true);
         notificationChannel.enableVibration(true);
-        notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         getNotificationManager().createNotificationChannel(notificationChannel);
     }
 
@@ -39,14 +40,12 @@ public class OreoAndAboveNotification extends ContextWrapper {
         return notificationManager;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+@TargetApi(Build.VERSION_CODES.O)
     public Notification.Builder getNotifications(String title, String body, PendingIntent pIntent, Uri soundUri, String icon) {
         return new Notification.Builder(getApplicationContext(), ID)
                 .setContentIntent(pIntent)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .setCategory(Notification.CATEGORY_MESSAGE)
                 .setSound(soundUri)
                 .setAutoCancel(true)
                 .setSmallIcon(Integer.parseInt(icon));

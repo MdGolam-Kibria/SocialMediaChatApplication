@@ -56,12 +56,10 @@ public class FirebaseMessaging extends FirebaseMessagingService {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pIntent =PendingIntent.getActivity(this,i,intent,PendingIntent.FLAG_ONE_SHOT);
         Uri defSoundtUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"some_id")
                 .setSmallIcon(Integer.parseInt(icon))
                 .setContentText(body)
                 .setContentTitle(title)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .setCategory(Notification.CATEGORY_MESSAGE)
                 .setAutoCancel(true)
                 .setSound(defSoundtUri)
                 .setContentIntent(pIntent);
