@@ -153,6 +153,9 @@ public class AddPostActivity extends AppCompatActivity {
 
     }
 
+    /*
+    //post with image to firebase storage and save this uri into firebase database
+     */
     private void uploadData(final String title, final String description, final String uri) {
         pd.setMessage("Publishing Post....");
         pd.show();
@@ -160,9 +163,9 @@ public class AddPostActivity extends AppCompatActivity {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
         final String timeStamp = formatter.format(date);
-        String filePathAndName="Posts/"+"post_"+timeStamp;
-        if (!uri.equals("noImage")){
-        //post with image
+        String filePathAndName = "Posts/" + "post_" + timeStamp;
+        if (!uri.equals("noImage")) {//post with image this image is uploaded to firebase storage and save the image url to firebase database.
+            //post with image
             StorageReference ref = FirebaseStorage.getInstance().getReference().child(filePathAndName);
             ref.putFile(Uri.parse(uri))
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -170,21 +173,21 @@ public class AddPostActivity extends AppCompatActivity {
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             //image is uploaded to firebase storage now get the image url
                             Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-                            while (!uriTask.isSuccessful());
+                            while (!uriTask.isSuccessful()) ;
                             String downloadUri = uriTask.getResult().toString();
-                            if (uriTask.isSuccessful()){
+                            if (uriTask.isSuccessful()) {
                                 //uri received uploaded post to firebase databse
-                                HashMap<Object,String> hashMap  = new HashMap<>();
+                                HashMap<Object, String> hashMap = new HashMap<>();
                                 //put post info
-                                hashMap.put("uid",uid);
-                                hashMap.put("uName",name);
-                                hashMap.put("uEmail",email);
-                                hashMap.put("uDp",dp);
-                                hashMap.put("pId",timeStamp);
-                                hashMap.put("pTitle",title);
-                                hashMap.put("pDescr",description);
-                                hashMap.put("pImage",downloadUri);
-                                hashMap.put("pTime",timeStamp);
+                                hashMap.put("uid", uid);
+                                hashMap.put("uName", name);
+                                hashMap.put("uEmail", email);
+                                hashMap.put("uDp", dp);
+                                hashMap.put("pId", timeStamp);
+                                hashMap.put("pTitle", title);
+                                hashMap.put("pDescr", description);
+                                hashMap.put("pImage", downloadUri);
+                                hashMap.put("pTime", timeStamp);
 
                                 //path to store post data
                                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts");
@@ -193,21 +196,21 @@ public class AddPostActivity extends AppCompatActivity {
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
-                                                    //added in database
+                                                //added in database
                                                 pd.dismiss();
                                                 Toast.makeText(AddPostActivity.this, "Post Published", Toast.LENGTH_LONG).show();
                                                 //after post published reset views
                                                 titleEt.setText("");
                                                 descriptionEt.setText("");
                                                 imageIv.setImageURI(null);
-                                                image_uri=null;
+                                                image_uri = null;
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
                                         //faild adding post in database
                                         pd.dismiss();
-                                        Toast.makeText(AddPostActivity.this, ""+e.getMessage(), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(AddPostActivity.this, "" + e.getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -217,23 +220,23 @@ public class AddPostActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             pd.dismiss();
-                            Toast.makeText(AddPostActivity.this, ""+e.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(AddPostActivity.this, "" + e.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
-        }else {
+        } else {
             //post without image///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            HashMap<Object,String> hashMap  = new HashMap<>();
+            HashMap<Object, String> hashMap = new HashMap<>();
             //put post info
-            hashMap.put("uid",uid);
-            hashMap.put("uName",name);
-            hashMap.put("uEmail",email);
-            hashMap.put("uDp",dp);
-            hashMap.put("pId",timeStamp);
-            hashMap.put("pTitle",title);
-            hashMap.put("pDescr",description);
-            hashMap.put("pImage","noImage");
-            hashMap.put("pTime",timeStamp);
+            hashMap.put("uid", uid);
+            hashMap.put("uName", name);
+            hashMap.put("uEmail", email);
+            hashMap.put("uDp", dp);
+            hashMap.put("pId", timeStamp);
+            hashMap.put("pTitle", title);
+            hashMap.put("pDescr", description);
+            hashMap.put("pImage", "noImage");
+            hashMap.put("pTime", timeStamp);
 
             //path to store post data
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts");
@@ -249,14 +252,14 @@ public class AddPostActivity extends AppCompatActivity {
                             titleEt.setText("");
                             descriptionEt.setText("");
                             imageIv.setImageURI(null);
-                            image_uri=null;
+                            image_uri = null;
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     //faild adding post in database
                     pd.dismiss();
-                    Toast.makeText(AddPostActivity.this, ""+e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddPostActivity.this, "" + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
 
