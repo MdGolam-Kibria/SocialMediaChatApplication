@@ -44,8 +44,8 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
         actionBar = getSupportActionBar();
         actionBar.setTitle("Profile");
         checkUserStatus();
-        //updateToken
         updateToken(FirebaseInstanceId.getInstance().getToken());
+        //updateToken
     }
 
     @Override
@@ -82,7 +82,7 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
             SharedPreferences.Editor editor = sp.edit();
             editor.putString("Current_USERID", mUID);
             editor.apply();
-        } else {
+        } else{
             //user not signed in
             startActivity(new Intent(DashBoardActivity.this, MainActivity.class));
             finish();
@@ -94,6 +94,12 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
         //check on start of app
         checkUserStatus();
         super.onStart();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     @Override

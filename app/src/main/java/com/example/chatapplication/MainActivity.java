@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity{
     Button login, resister;
     ProgressDialog progressDialog;
 
@@ -18,23 +18,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         login = findViewById(R.id.login);
         resister = findViewById(R.id.resister);
-        resister.setOnClickListener(this);
-        login.setOnClickListener(this);
         progressDialog = new ProgressDialog(this);//for show resister progress.
         progressDialog.setMessage("Resistering User......");
-
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.resister:
+        resister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, ResisterActivity.class));
-            case R.id.login:
+            }
+        });
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
-        }
+            }
+        });
+
     }
+
+
 }
 
 
