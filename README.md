@@ -21,7 +21,7 @@ In this project we develop a social media application
               *when a sender send sms to another user user get a notification
 - add post ,,,user can post a status with image and without image like FACEBOOK
 - implement post date and time.
--add user email in this post page.
+-add user email in this post page i mean current user email.
 - update profile  features using UI.<br/>
 
 
