@@ -19,6 +19,9 @@ In this project we develop a social media application
 - implement active or not.
 - implement Notifications <br/>
               *when a sender send sms to another user user get a notification
+- add post ,,,user can post a status with image and without image like FACEBOOK
+- implement post date and time.
+-add user email in this post page.
 - update profile  features using UI.<br/>
 
 
