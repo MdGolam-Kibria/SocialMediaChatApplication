@@ -11,4 +11,9 @@
         app:showAsAction="always"
         app:actionViewClass="androidx.appcompat.widget.SearchView">
     </item>
+    <item
+        android:id="@+id/actionAddPost"
+        android:title="Add Post"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_add_white"></item>
 </menu>

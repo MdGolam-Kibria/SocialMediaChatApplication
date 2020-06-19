@@ -149,6 +149,8 @@ public class UsersFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {//for inflate option menu
         inflater.inflate(R.menu.menu, menu);
+        //hide add post icon from this fragment
+        menu.findItem(R.id.actionAddPost).setVisible(false);
         //search view
         MenuItem item = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
@@ -156,7 +158,6 @@ public class UsersFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-
                 //called when user pressed search button from keyboard
                 //if search quary is not empty then search
                 if (!TextUtils.isEmpty(s.trim())) {

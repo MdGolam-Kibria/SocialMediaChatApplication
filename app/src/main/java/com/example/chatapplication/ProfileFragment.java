@@ -578,6 +578,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             firebaseAuth.signOut();
             checkUserStatus();
         }
+        if (id == R.id.actionAddPost) {
+            startActivity(new Intent(getActivity(),AddPostActivity.class));
+        }
         return super.onOptionsItemSelected(item);
     }
 }

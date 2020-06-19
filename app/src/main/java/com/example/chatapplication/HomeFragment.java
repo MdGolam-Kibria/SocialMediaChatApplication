@@ -67,6 +67,9 @@ FirebaseAuth firebaseAuth;
             firebaseAuth.signOut();
             checkUserStatus();
         }
+        if (id == R.id.actionAddPost) {
+            startActivity(new Intent(getActivity(),AddPostActivity.class));
+        }
         return super.onOptionsItemSelected(item);
     }
 }
