@@ -474,7 +474,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                             HashMap<String, Object> results = new HashMap<>();
                     /*here first paramiter is  profileOrCoverPhoto that has value "image" or "cover"
                     which are keys in users database where url of image will be saved in one of them
-
                     secound paramiter contains the url of image stored in firebase storage this url will be saved as value
                      against key "image" or  "cover"*/
                             results.put(profileOrCoverPhoto, dawonloadUri.toString());
@@ -584,5 +583,3 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         return super.onOptionsItemSelected(item);
     }
 }
-
-

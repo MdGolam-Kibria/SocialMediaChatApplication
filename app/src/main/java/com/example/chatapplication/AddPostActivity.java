@@ -434,7 +434,7 @@ public class AddPostActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         //this method will be called after picking image from camera or gallery...
         if (requestCode == RESULT_OK) {
-            if (requestCode == IMAGE_PICK_GALLERY_CODE) {//for gellary image pic hundle after picking image
+            if (requestCode == IMAGE_PICK_GALLERY_CODE) {//for gellary image pic handle after picking image.
                 //image is picked from gallery ,get uri of image.
                 image_uri = data.getData();
                 //set to image view
