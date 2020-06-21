@@ -24,6 +24,7 @@ In this project we develop a social media application
 -add user email in this post page i mean current user email.
 - show all user post with image and without image with set like,comment,share options.
 -Show and Search User Specific Posts.
+- if user update her name ,pic it automatically change "Users"and also "Posts" path in firebase
 - update profile  features using UI.<br/>
 
 
