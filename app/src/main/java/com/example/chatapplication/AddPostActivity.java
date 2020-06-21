@@ -160,9 +160,10 @@ public class AddPostActivity extends AppCompatActivity {
         pd.setMessage("Publishing Post....");
         pd.show();
         //for post image,name,post_id,post_published_time;
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        Date date = new Date();
-        final String timeStamp = formatter.format(date);
+//        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//        Date date = new Date();
+//        final String timeStamp = formatter.format(date);
+        final String timeStamp = String.valueOf(System.currentTimeMillis());
         String filePathAndName = "Posts/" + "post_" + timeStamp;
         if (!uri.equals("noImage")) {//post with image this image is uploaded to firebase storage and save the image url to firebase database.
             //post with image
