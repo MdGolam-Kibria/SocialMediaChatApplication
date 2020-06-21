@@ -1,6 +1,7 @@
 package com.example.chatapplication.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatapplication.R;
+import com.example.chatapplication.ThereProfileActivity;
 import com.example.chatapplication.modelAll.ModelPost;
 import com.squareup.picasso.Picasso;
 
@@ -43,7 +46,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
-        String uId = postList.get(position).getUid();
+        final String uId = postList.get(position).getUid();
         String uEmail = postList.get(position).getUEmail();
         String uName = postList.get(position).getUName();
         String uDp = postList.get(position).getUDp();
@@ -112,6 +115,18 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
                 Toast.makeText(context, "share", Toast.LENGTH_SHORT).show();
             }
         });
+        holder.profileLayout.setOnClickListener(new View.OnClickListener() {//for show specific user profile.
+            @Override
+            public void onClick(View v) {
+                /*
+                click to go there profile activity with uid , This uid is of clicked user
+                        *which will be used to show user specific data/posts
+                 */
+                Intent intent = new Intent(context, ThereProfileActivity.class);
+                intent.putExtra("uid",uId);
+                context.startActivity(intent);
+            }
+        });
 
     }
 
@@ -127,6 +142,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
         TextView uNameTv, pTimeTv, pTitleTv, pDescriptionTv, pLikesTv;
         ImageButton moreBtn;
         Button likeBtn, commentBtn, shareBtn;
+        LinearLayout profileLayout;
 
         public MyHolder(@NonNull View itemView) {
             super(itemView);
@@ -147,6 +163,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
             likeBtn = itemView.findViewById(R.id.likeBtn);
             commentBtn = itemView.findViewById(R.id.commentBtn);
             shareBtn = itemView.findViewById(R.id.shareBtn);
+            profileLayout = itemView.findViewById(R.id.profileLayout);
 
         }
     }

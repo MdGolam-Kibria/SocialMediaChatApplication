@@ -25,11 +25,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chatapplication.adapter.AdapterPost;
 import com.example.chatapplication.convertImage.BitmapImageToString;
 import com.example.chatapplication.convertImage.StringImageCodeToBitmap;
+import com.example.chatapplication.modelAll.ModelPost;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -46,7 +52,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 import static com.google.firebase.storage.FirebaseStorage.getInstance;
@@ -60,6 +68,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     ImageView avaterIv, coverIv;
     TextView nameTv, emailTv, phoneTv;
     FloatingActionButton fab;
+    RecyclerView postsRecyclerview;
     ProgressDialog pd;
     //
     public static final int IMAGE_PIC_CAMERA_CODE_for_profile_pic = 1;
@@ -86,7 +95,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     //path where storage of user profile and cover photo will be stored.
     String storagePath = "Users_Profile_Cover_Imgs/";
     private String myUid;
-
+    List<ModelPost> postList;
+    AdapterPost adapterPost;
+    String uid;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -103,6 +114,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         emailTv = view.findViewById(R.id.emailTv);
         phoneTv = view.findViewById(R.id.phoneTv);
         fab = view.findViewById(R.id.fab);
+        postsRecyclerview = view.findViewById(R.id.recyclerview_posts);
         pd = new ProgressDialog(getActivity());
         fab.setOnClickListener(this);
         firebaseAuth = FirebaseAuth.getInstance();
@@ -113,6 +125,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         //int arrays of permission
         cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+
 
 
 
@@ -165,9 +179,98 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
             }
         });
-
-
+        postList = new ArrayList<>();
+        checkUserStatus();
+        loadMyPosts();
         return view;
+    }
+
+    private void loadMyPosts() {
+        //linearLayout for recyclerview
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        //show newest post first.for this load from last
+        manager.setStackFromEnd(true);
+        manager.setReverseLayout(true);
+        //set this layout to recyclerview
+        postsRecyclerview.setLayoutManager(manager);
+        //initt.posts list
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts");
+        //Query to load posts
+        /*whenever user publishes a post the uid of this user is also saved as a info of post
+         *so we are retrieving posts having uid equalsTo current user uid "uid"
+         */
+        Query query = ref.orderByChild("uid").equalTo(uid);//jodi post firebase er theke asa data gula theke uid current user er sathe match kore
+        //now get all data from ref
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                postList.clear();
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    ModelPost modelPost = ds.getValue(ModelPost.class);
+                    //now all value add to list
+                    postList.add(modelPost);
+                    //adapter
+                    adapterPost = new AdapterPost(getActivity(), postList);
+                    //add this adapter in recyclerview
+                    postsRecyclerview.setAdapter(adapterPost);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), "" + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+
+    }
+
+    private void searchMyPosts(final String searchQuery) {
+        //linearLayout for recyclerview
+        final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        //show newest post first.for this load from last
+        manager.setStackFromEnd(true);
+        manager.setReverseLayout(true);
+        //set this layout to recyclerview
+        postsRecyclerview.setLayoutManager(manager);
+        //initt.posts list
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts");
+        //Query to load posts
+        /*whenever user publishes a post the uid of this user is also saved as a info of post
+         *so we are retrieving posts having uid equalsTo current user uid "uid"
+         */
+        Query query = ref.orderByChild("uid").equalTo(uid);//jodi post firebase er theke asa data gula theke uid current user er sathe match kore
+        //now get all data from ref
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                postList.clear();
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    ModelPost myPosts = ds.getValue(ModelPost.class);
+
+                    if (myPosts.getPTitle().toLowerCase().contains(searchQuery.toLowerCase()) ||
+                            myPosts.getPDescr().toLowerCase().contains(searchQuery.toLowerCase())) {//This condition for search .
+                        postList.add(myPosts);
+
+                    }
+                    //now all value add to list
+                    postList.add(myPosts);
+                    //adapter
+                    adapterPost = new AdapterPost(getActivity(), postList);
+                    //add this adapter in recyclerview
+                    postsRecyclerview.setAdapter(adapterPost);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), "" + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+
     }
 
 
@@ -262,7 +365,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String value = editText.getText().toString().trim();
+                final String value = editText.getText().toString().trim();
                 if (!TextUtils.isEmpty(value)) {//if user input is empty
                     pd.show();
                     HashMap<String, Object> result = new HashMap<>();
@@ -284,6 +387,27 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                     Toast.makeText(getActivity(), "error update name/phone" + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             });
+                    //if user edit his name also change it from hist posts.
+                    //mane jodi user name update kora hoi tobe seta firebase er  "users" path er sathe "posts" path e o update hobe
+                    if (key.equals("name")){
+                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts");
+                        Query query = ref.orderByChild("uid").equalTo(uid);
+                        query.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot ds: dataSnapshot.getChildren()){
+                                    String child = ds.getKey();
+                                    dataSnapshot.getRef().child(child).child("uName").setValue(value);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+                    }
                 } else {
                     Toast.makeText(getActivity(), "please enter your " + key, Toast.LENGTH_SHORT).show();
                 }
@@ -376,10 +500,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             bitmap = (Bitmap) data.getExtras().get("data");
             uploadProfilePhoto(bitmap, "profilePic");
         }
-        if (requestCode==IMAGE_PIC_CAMERA_CODE_for_coverPhoto){
+        if (requestCode == IMAGE_PIC_CAMERA_CODE_for_coverPhoto) {
             ///later
             bitmap = (Bitmap) data.getExtras().get("data");
-            uploadProfilePhoto(bitmap,"coverPhoto");
+            uploadProfilePhoto(bitmap, "coverPhoto");
         }
 
 
@@ -409,7 +533,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         //path to store user data named "Users";
         HashMap<String, Object> map = new HashMap<>();
-        if (profileOrCoverPhoto.equals("profilePic")){//for update profile pic
+        if (profileOrCoverPhoto.equals("profilePic")) {//for update profile pic
             map.put("image", BitmapImageToString.convert(bitmap));
             databaseReference.child(user.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
@@ -419,11 +543,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(getActivity(), "profile pic Failed "+ e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "profile pic Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         }
-        if (profileOrCoverPhoto.equals("coverPhoto")){//for update cover photo
+        if (profileOrCoverPhoto.equals("coverPhoto")) {//for update cover photo
             map.put("cover", BitmapImageToString.convert(bitmap));
             databaseReference.child(user.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
@@ -466,7 +590,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         //image is upload to storage .now gets its url and store in user's database
                         Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
                         while (!uriTask.isSuccessful()) ;
-                        Uri dawonloadUri = uriTask.getResult();
+                        final Uri dawonloadUri = uriTask.getResult();
                         //check if image is uploaded or not and url is received
                         if (uriTask.isSuccessful()) {
                             //image uploaded
@@ -496,6 +620,27 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                             Toast.makeText(getActivity(), "error from update image = " + e.getMessage(), Toast.LENGTH_LONG).show();
                                         }
                                     });
+
+                            //if user edit his image also change it from hist posts.
+                            //mane jodi user image update kora hoi tobe seta firebase er  "users" path er sathe "posts" path e o update hobe
+                            if (profileOrCoverPhoto.equals("image")) {
+                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts");
+                                Query query = ref.orderByChild("uid").equalTo(uid);
+                                query.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                            String child = ds.getKey();
+                                            dataSnapshot.getRef().child(child).child("uDp").setValue(dawonloadUri.toString());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
                         } else {
                             //error here
                             pd.dismiss();
@@ -519,7 +664,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE_SECURE);
         if (which == 0) {
             startActivityForResult(takePictureIntent, IMAGE_PIC_CAMERA_CODE_for_profile_pic);
-        } if (which==1){
+        }
+        if (which == 1) {
             startActivityForResult(takePictureIntent, IMAGE_PIC_CAMERA_CODE_for_coverPhoto);
         }
     }
@@ -551,6 +697,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         if (user != null) {
             //user signed in stay here
 //            mProfileTv.setText(user.getEmail());
+            uid = user.getUid();
+
         } else {
             //user not signed in
             startActivity(new Intent(getActivity(), MainActivity.class));
@@ -567,6 +715,31 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {//for inflate option menu
         inflater.inflate(R.menu.menu, menu);
+        MenuItem item = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //called whrn user press search button
+                if (!TextUtils.isEmpty(query)) {
+                    searchMyPosts(query);
+                } else {
+                    loadMyPosts();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //called when user type any latter
+                if (!TextUtils.isEmpty(newText)) {
+                    searchMyPosts(newText);
+                } else {
+                    loadMyPosts();
+                }
+                return false;
+            }
+        });
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -578,7 +751,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             checkUserStatus();
         }
         if (id == R.id.actionAddPost) {
-            startActivity(new Intent(getActivity(),AddPostActivity.class));
+            startActivity(new Intent(getActivity(), AddPostActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
