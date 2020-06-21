@@ -23,6 +23,7 @@ In this project we develop a social media application
 - implement post date and time.
 -add user email in this post page i mean current user email.
 - show all user post with image and without image with set like,comment,share options.
+-Show and Search User Specific Posts.
 - update profile  features using UI.<br/>
 
 
