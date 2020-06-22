@@ -25,7 +25,7 @@ In this project we develop a social media application
 - show all user post with image and without image with set like,comment,share options.
 -Show and Search User Specific Posts.
 - if user update her name ,pic it automatically change "Users"and also "Posts" path in firebase
-- implement Delete Posts....if user can delete her own posts not her friends.
+- implement Delete Posts....if user can delete her own posts not her friends posts.
 - update profile  features using UI.<br/>
 
 
