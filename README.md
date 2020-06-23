@@ -17,6 +17,7 @@ In this project we develop a social media application
 - show relatime user typing or not
 - add notification sound
 - implement active or not.
+-  add last active time.
 - implement Notifications <br/>
               *when a sender send sms to another user user get a notification
 - add post ,,,user can post a status with image and without image like FACEBOOK
