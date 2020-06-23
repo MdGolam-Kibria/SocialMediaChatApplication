@@ -26,6 +26,7 @@ In this project we develop a social media application
 -Show and Search User Specific Posts.
 - if user update her name ,pic it automatically change "Users"and also "Posts" path in firebase
 - implement Delete Posts....if user can delete her own posts not her friends posts.
+- any user can check her friends status.
 - update profile  features using UI.<br/>
 
 
