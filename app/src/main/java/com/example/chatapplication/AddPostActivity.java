@@ -173,12 +173,15 @@ public class AddPostActivity extends AppCompatActivity {
         });
 
     }
-
+        /*
+        if user want to update her post
+         */
     private void beginUpdate(final String title, final String description, final String editPostId) {
-        if (editImage.equals("noImage")) {
+        if (editImage.equals("noImage")) {//Post that the user wants to update but here don't have any image
+            pd.setMessage("Post Updating");
             pd.show();
             updateWithoutImage(title, description, editPostId);
-        } else {
+        } else {//Post that the user wants to update but this post including image
             pd.setMessage("Post Updating");
             pd.show();
             updatePostWithImage(title, description, editPostId);
@@ -187,8 +190,8 @@ public class AddPostActivity extends AppCompatActivity {
 
     private void updatePostWithImage(final String title, final String description, final String editPostId) {
         if (image_uri==null){
-            updateWithoutImageAfterPostWithImage(title,description,editPostId);
-        }else{
+            updateWithoutImageAfterPostWithImage(title,description,editPostId);// ****if user want to update her post he want he just update her title and description but image still same
+        }else{//user have a post with image,now user want to update her post image or image with title and/or description
             StorageReference mPictureRef = FirebaseStorage.getInstance().getReferenceFromUrl(editImage);
             mPictureRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
@@ -255,7 +258,9 @@ public class AddPostActivity extends AppCompatActivity {
             });
         }
     }
-
+        /*
+        user have a post without image now he want to update the post data
+         */
     private void updateWithoutImage(String title, String description, String editPostId) {
         HashMap<String, Object> hashMap = new HashMap<>();
         //put post info
@@ -288,6 +293,10 @@ public class AddPostActivity extends AppCompatActivity {
             }
         });
     }
+    /*
+    update a post using post id
+                    ****if user want to update her post he want he just update her title and description but image still same
+     */
     private void updateWithoutImageAfterPostWithImage(String title, String description, String editPostId) {
 
         final String timeStamp = String.valueOf(System.currentTimeMillis());
@@ -324,7 +333,9 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
 
-
+    /*
+    load post all data before update a post using the post id
+     */
     private void loadPostData(String editPostId) {//for updating a post using the Post Id
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts");
         //get details of post using id of the post
