@@ -262,11 +262,13 @@ public class AddPostActivity extends AppCompatActivity {
         user have a post without image now he want to update the post data
          */
     private void updateWithoutImage(String title, String description, String editPostId) {
+        final String timeStamp = String.valueOf(System.currentTimeMillis());//for update time
         HashMap<String, Object> hashMap = new HashMap<>();
         //put post info
         hashMap.put("uid", uid);
         hashMap.put("uName", name);
         hashMap.put("uEmail", email);
+        hashMap.put("pTime", timeStamp);
         hashMap.put("uDp", dp);
         hashMap.put("pTitle", title);
         hashMap.put("pDescr", description);
