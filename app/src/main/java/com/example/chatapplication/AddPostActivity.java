@@ -208,33 +208,24 @@ public class AddPostActivity extends AppCompatActivity {
                                 hashMap.put("uid", uid);
                                 hashMap.put("uName", name);
                                 hashMap.put("uEmail", email);
-                                hashMap.put("uDp", dp);//user profile image
-                                hashMap.put("pId", timeStamp);
+                                hashMap.put("uDp", dp);
                                 hashMap.put("pTitle", title);
                                 hashMap.put("pDescr", description);
                                 hashMap.put("pImage", downloadUri);
-                                hashMap.put("pTime", timeStamp);
-
-                                //path to store post data
-                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts");
-                                //now put data in this ref
-                                ref.child(editPostId).updateChildren(hashMap).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        //added in database
-                                        pd.dismiss();
-                                        Toast.makeText(AddPostActivity.this, "Post Updated", Toast.LENGTH_LONG).show();
-                                        //after post published reset views
-                                        titleEt.setText("");
-                                        descriptionEt.setText("");
-                                        imageIv.setImageURI(null);
-                                        image_uri = null;
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
+                                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts");
+                                reference.child(editPostId)//mane jei post ta edit kortice sei post er id
+                                        .updateChildren(hashMap)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                pd.dismiss();
+                                                Toast.makeText(AddPostActivity.this, "Post Updated", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
                                         pd.dismiss();
-                                        Toast.makeText(AddPostActivity.this, "database dont updated  "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(AddPostActivity.this, "" + e.getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }

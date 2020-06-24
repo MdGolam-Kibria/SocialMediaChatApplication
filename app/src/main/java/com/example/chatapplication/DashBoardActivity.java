@@ -42,7 +42,7 @@ public class DashBoardActivity extends AppCompatActivity implements BottomNaviga
         navigationView.setSelectedItemId(R.id.nav_home);//for on create mode select fragment in BottomNavigationView.
 
         actionBar = getSupportActionBar();
-        actionBar.setTitle("Profile");
+        actionBar.setTitle("News Feed");
         checkUserStatus();
 
     }
