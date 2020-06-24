@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -62,7 +63,8 @@ public class AddPostActivity extends AppCompatActivity {
 
     EditText titleEt, descriptionEt;
     ImageView imageIv;
-    Button uploadBtn;
+    Button uploadBtn,deleteImageBtn;
+    LinearLayout imageLayout;
     //user info
     String name, email, uid, dp;
     //info of post to be edited
@@ -89,6 +91,7 @@ public class AddPostActivity extends AppCompatActivity {
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         pd = new ProgressDialog(this);
+        pd.setCanceledOnTouchOutside(false);
 
         firebaseAuth = FirebaseAuth.getInstance();
         checkUserStatus();
@@ -98,6 +101,8 @@ public class AddPostActivity extends AppCompatActivity {
         descriptionEt = findViewById(R.id.pDescriptionEt);
         imageIv = findViewById(R.id.pImageIv);
         uploadBtn = findViewById(R.id.pUploadBtn);
+        deleteImageBtn=findViewById(R.id.imageDeleteBtn);
+        imageLayout = findViewById(R.id.imageLayout);
         //get data through intent from previous activitie's adapter
         Intent intent = getIntent();
         final String isUpdateKey = "" + intent.getStringExtra("key");
@@ -112,6 +117,7 @@ public class AddPostActivity extends AppCompatActivity {
             //otherwise user can ADD post.
             actionBar.setTitle("Add New Post");
             uploadBtn.setText("Upload");
+            deleteImageBtn.setVisibility(View.GONE);//if user click add post delete image button can't visible to user
 
         }
 
@@ -171,11 +177,71 @@ public class AddPostActivity extends AppCompatActivity {
 
             }
         });
+        //update time if user want to delete her image;
+        deleteImageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //update time delete image
+                //get data (title,description) from editText
+                String title = titleEt.getText().toString().trim();
+                String description = descriptionEt.getText().toString().trim();
+                if (TextUtils.isEmpty(title)) {
+                    Toast.makeText(AddPostActivity.this, "Enter your title here,,", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (TextUtils.isEmpty(description)) {
+                    Toast.makeText(AddPostActivity.this, "Enter your description here", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                updateTimeDeletePostImage(title,description,editPostId);// //update time if user want to delete her image;
+                pd.setMessage("Deleting your post image");
+                pd.show();
+            }
+        });
 
     }
-        /*
-        if user want to update her post
-         */
+
+    private void updateTimeDeletePostImage(String title, String description,final String editPostId) {
+        StorageReference mPictureRef = FirebaseStorage.getInstance().getReferenceFromUrl(editImage);
+        mPictureRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                pd.dismiss();
+                imageLayout.setVisibility(View.GONE);
+                Toast.makeText(AddPostActivity.this, "Image deleted", Toast.LENGTH_SHORT).show();
+                //image deleted now update database image uri "noImage"
+
+                HashMap<String, Object> hashMap = new HashMap<>();
+                //put post info
+                final String timeStamp = String.valueOf(System.currentTimeMillis());
+                hashMap.put("pTime",timeStamp);
+                hashMap.put("pImage", "noImage");
+                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts");
+                reference.child(editPostId)//mane jei post ta edit kortice sei post er id
+                        .updateChildren(hashMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(AddPostActivity.this, "Update database", Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(AddPostActivity.this, "problem from update database  "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(AddPostActivity.this, "Problem with deleting image  "+e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /*
+    if user want to update her post
+     */
     private void beginUpdate(final String title, final String description, final String editPostId) {
         if (editImage.equals("noImage")) {//Post that the user wants to update but here don't have any image
             pd.setMessage("Post Updating");
@@ -215,6 +281,7 @@ public class AddPostActivity extends AppCompatActivity {
                                 hashMap.put("uName", name);
                                 hashMap.put("uEmail", email);
                                 hashMap.put("uDp", dp);
+                                hashMap.put("pTime", timeStamp);
                                 hashMap.put("pTitle", title);
                                 hashMap.put("pDescr", description);
                                 hashMap.put("pImage", downloadUri);

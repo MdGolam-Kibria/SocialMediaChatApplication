@@ -11,44 +11,59 @@
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
         android:orientation="vertical">
-<!--        for input post title-->
+        <!--        for input post title-->
         <EditText
             android:id="@+id/pTitleEt"
-            android:background="@drawable/edittextstyle"
             android:layout_width="match_parent"
-            android:padding="10dp"
-            android:singleLine="true"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittextstyle"
             android:hint="Enter your Title here"
-            android:layout_height="wrap_content"/>
-<!--        for input pot image-->
-        
-        <ImageView
-            android:id="@+id/pImageIv"
-            android:background="@color/colorPrimary"
-            android:layout_width="180dp"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"
-            android:layout_height="180dp"
-            android:minHeight="200dp"/>
-<!--        input post description-->
+            android:padding="10dp"
+            android:singleLine="true" />
+
+        <LinearLayout
+            android:id="@+id/imageLayout"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <!--        for input pot image-->
+            <ImageView
+                android:id="@+id/pImageIv"
+                android:layout_width="200dp"
+                android:layout_height="180dp"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimary"
+                android:minHeight="200dp" />
+            <Button
+                android:id="@+id/imageDeleteBtn"
+                android:text="Delete Image"
+                android:drawableLeft="@drawable/ic_delete_image"
+                android:textAllCaps="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!--        input post description-->
 
         <EditText
             android:id="@+id/pDescriptionEt"
-            android:background="@drawable/edittextstyle"
             android:layout_width="match_parent"
-            android:padding="10dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittextstyle"
+            android:gravity="start"
             android:hint="Enter your Description here"
             android:inputType="textCapSentences|textMultiLine"
             android:minHeight="120dp"
-            android:gravity="start"
-            android:layout_height="wrap_content"/>
-<!--        for publish post to firebase-->
+            android:padding="10dp" />
+        <!--        for publish post to firebase-->
         <Button
             android:id="@+id/pUploadBtn"
             style="@style/Widget.AppCompat.Button.Colored"
-            android:text="Upload"
-            android:layout_gravity="end"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="Upload" />
     </LinearLayout>
 </ScrollView>
