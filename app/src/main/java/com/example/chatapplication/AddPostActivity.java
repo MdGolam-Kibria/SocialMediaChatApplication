@@ -186,13 +186,16 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
     private void updatePostWithImage(final String title, final String description, final String editPostId) {
-        StorageReference mPictureRef = FirebaseStorage.getInstance().getReferenceFromUrl(editImage);
-        mPictureRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                final String timeStamp = String.valueOf(System.currentTimeMillis());
-                String filePathAndName = "Posts/" + "post_" + timeStamp;
-                //post with image
+        if (image_uri==null){
+            updateWithoutImageAfterPostWithImage(title,description,editPostId);
+        }else{
+            StorageReference mPictureRef = FirebaseStorage.getInstance().getReferenceFromUrl(editImage);
+            mPictureRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    final String timeStamp = String.valueOf(System.currentTimeMillis());
+                    String filePathAndName = "Posts/" + "post_" + timeStamp;
+                    //post with image
                     StorageReference ref = FirebaseStorage.getInstance().getReference().child(filePathAndName);
                     ref.putFile(image_uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -220,6 +223,11 @@ public class AddPostActivity extends AppCompatActivity {
                                             public void onSuccess(Void aVoid) {
                                                 pd.dismiss();
                                                 Toast.makeText(AddPostActivity.this, "Post Updated", Toast.LENGTH_SHORT).show();
+                                                //after post published reset views
+                                                titleEt.setText("");
+                                                descriptionEt.setText("");
+                                                imageIv.setImageURI(null);
+                                                image_uri = null;
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -234,18 +242,18 @@ public class AddPostActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             pd.dismiss();
-                                Toast.makeText(AddPostActivity.this, "iamge don't uploaded "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AddPostActivity.this, "iamge don't uploaded " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                pd.dismiss();
-                Toast.makeText(AddPostActivity.this, "image don' deleted   " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    pd.dismiss();
+                    Toast.makeText(AddPostActivity.this, "image don' deleted   " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void updateWithoutImage(String title, String description, String editPostId) {
@@ -266,6 +274,45 @@ public class AddPostActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         pd.dismiss();
                         Toast.makeText(AddPostActivity.this, "Post Updated", Toast.LENGTH_SHORT).show();
+                        //after post published reset views
+                        titleEt.setText("");
+                        descriptionEt.setText("");
+                        imageIv.setImageURI(null);
+                        image_uri = null;
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                pd.dismiss();
+                Toast.makeText(AddPostActivity.this, "" + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    private void updateWithoutImageAfterPostWithImage(String title, String description, String editPostId) {
+
+        final String timeStamp = String.valueOf(System.currentTimeMillis());
+        HashMap<String, Object> hashMap = new HashMap<>();
+        //put post info
+        hashMap.put("uid", uid);
+        hashMap.put("uName", name);
+        hashMap.put("uEmail", email);
+        hashMap.put("pTime", timeStamp);
+        hashMap.put("uDp", dp);
+        hashMap.put("pTitle", title);
+        hashMap.put("pDescr", description);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts");
+        reference.child(editPostId)//mane jei post ta edit kortice sei post er id
+                .updateChildren(hashMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        pd.dismiss();
+                        Toast.makeText(AddPostActivity.this, "Post Updated", Toast.LENGTH_SHORT).show();
+                        //after post published reset views
+                        titleEt.setText("");
+                        descriptionEt.setText("");
+                        imageIv.setImageURI(null);
+                        image_uri = null;
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
