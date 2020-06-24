@@ -28,6 +28,7 @@ In this project we develop a social media application
 - if user update her name ,pic it automatically change "Users"and also "Posts" path in firebase
 - implement Delete Posts....if user can delete her own posts not her friends posts.
 - any user can check her friends status.
+- implement update post  mechanism every user can update her own post.
 - update profile  features using UI.<br/>
 
 
