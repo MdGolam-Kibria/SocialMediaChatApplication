@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chatapplication.AddPostActivity;
 import com.example.chatapplication.R;
 import com.example.chatapplication.ThereProfileActivity;
 import com.example.chatapplication.modelAll.ModelPost;
@@ -156,6 +157,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
         //show delete option in only post(s) of currently singed in user so..........
         if (uId.equals(myUid) ) {//mane post er moddhe je gular id current user er sathe match korbe segula sei current user delete korte parbe
             popupMenu.getMenu().add(Menu.NONE, 0, 0, "Delete");
+            popupMenu.getMenu().add(Menu.NONE, 1, 0, "Edit");
 
         }
         //add onlick listener in menu item
@@ -166,6 +168,13 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
                 if (id == 0) {
                     //delete is clicked
                     beginDelete(pId, pImage);
+                }else if (id==1){
+                    //delete is clicked
+                    //start add post activity with key "editText" and the id of the post clicked
+                    Intent intent = new Intent(context, AddPostActivity.class);
+                    intent.putExtra("key","editPost");
+                    intent.putExtra("editPostId",pId);
+                    context.startActivity(intent);
                 }
                 return false;
             }
@@ -173,6 +182,8 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
         //show menu
         popupMenu.show();
     }
+
+
 
     private void beginDelete(String pId, String pImage) {
         //post can be with or without image so.....
