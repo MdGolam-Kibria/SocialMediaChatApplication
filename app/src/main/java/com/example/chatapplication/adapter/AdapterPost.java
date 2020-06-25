@@ -50,7 +50,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
     List<ModelPost> postList;
     String myUid;
     private DatabaseReference likesRef;//for likes database node.
-    private DatabaseReference postsRef;//refrence of posts.
+    private DatabaseReference postsRef;//Reference of posts.
     boolean mProcessLike = false;
 
     public AdapterPost(Context context, List<ModelPost> postList) {
@@ -131,22 +131,22 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
                 *if currently signed in user has not liked it before
                 * increase value by one , otherwise decrease value by one.
                 */
-               final int pLikes = Integer.parseInt(postList.get(position).getPLikes());
+               final int pLikes = Integer.parseInt(postList.get(position).getPLikes());//total like of a post
                mProcessLike=true;
                //get id of the post clicked.
-                final String postIde  = postList.get(position).getPId();//get id of the post clicked.
+                final String postId  = postList.get(position).getPId();//get id of the post clicked.
                 likesRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (mProcessLike){//if mProcessLike have true
-                                if (dataSnapshot.child(postIde).hasChild(myUid)){//jodi current user er id("myUid") jodi Likes node e thake. tar mane
+                                if (dataSnapshot.child(postId).hasChild(myUid)){//jodi current user er id("myUid") jodi Likes node e thake. tar mane
                                     //already liked , so remove like
-                                    postsRef.child(postIde).child("pLikes").setValue(""+(pLikes-1));
-                                    likesRef.child(postIde).child(myUid).removeValue();
+                                    postsRef.child(postId).child("pLikes").setValue(""+(pLikes-1));
+                                    likesRef.child(postId).child(myUid).removeValue();
                                     mProcessLike = false;
                                   }else {//not liked, so like it
-                                    postsRef.child(postIde).child("pLikes").setValue(""+(pLikes+1));
-                                    likesRef.child(postIde).child(myUid).setValue("Liked");//you can set any value
+                                    postsRef.child(postId).child("pLikes").setValue(""+(pLikes+1));
+                                    likesRef.child(postId).child(myUid).setValue("Liked");//you can set any value
                                     mProcessLike = false;
                                 }
                             }
