@@ -30,6 +30,7 @@ In this project we develop a social media application
 - any user can check her friends status.
 - implement update post  mechanism every user can update her own post.
 - user can update her post ...if user have a post with image user can change the image if user want to change just post or description it can posssible now using her post id.
+- in updating time user can delete her post image and post and user can post only title and description .
 - update profile  features using UI.<br/>
 
 
