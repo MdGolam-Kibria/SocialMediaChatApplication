@@ -26,12 +26,12 @@ In this project we develop a social media application
 - show all user post with image and without image with set like,comment,share options.
 -Show and Search User Specific Posts.
 - if user update her name ,pic it automatically change "Users"and also "Posts" path in firebase
-- implement Delete Posts....if user can delete her own posts not her friends posts with pic or without pic.
+- implement <b>Delete</b> Posts....if user can delete her own posts not her friends posts with pic or without pic.
 - any user can check her friends status.
 - implement update post  mechanism every user can update her own post.
 - user can update her post ...if user have a post with image user can change the image if user want to change just post or description it can posssible now using her post id.
 - in updating time user can delete her post image and post and user can post only title and description .
-- user can like her own and another post.
+- user can <b>like</b> her own and another post.
 - update profile  features using UI.<br/>
 
 
