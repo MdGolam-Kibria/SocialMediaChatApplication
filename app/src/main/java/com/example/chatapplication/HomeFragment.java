@@ -59,8 +59,8 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.postsRecyclerview);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         //show newest post last ,for this load from last
-        layoutManager.setStackFromEnd(false);
-        layoutManager.setReverseLayout(false);
+        layoutManager.setStackFromEnd(true);
+        layoutManager.setReverseLayout(true);
         recyclerView.setLayoutManager(layoutManager);
 
         //inti...post list
