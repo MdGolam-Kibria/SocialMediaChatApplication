@@ -141,7 +141,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
                             if (mProcessLike){//if mProcessLike have true
                                 if (dataSnapshot.child(postId).hasChild(myUid)){//jodi current user er id("myUid") jodi Likes node e thake. tar mane
                                     //already liked , so remove like
-                                    postsRef.child(postId).child("pLikes").setValue(""+(pLikes-1));
+                                    postsRef.child(postId).child("pLikes").setValue(""+(pLikes-1));//"pLikes" node a like koto hobe  seta set korlam
                                     likesRef.child(postId).child(myUid).removeValue();
                                     mProcessLike = false;
                                   }else {//not liked, so like it
