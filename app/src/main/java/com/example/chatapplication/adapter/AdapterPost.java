@@ -226,7 +226,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
             popupMenu.getMenu().add(Menu.NONE, 1, 0, "Edit");
 
         }
-        //add onlick listener in menu item
+        //add onClick listener in menu item
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
