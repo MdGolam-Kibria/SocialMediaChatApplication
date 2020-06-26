@@ -32,6 +32,7 @@ In this project we develop a social media application
 - user can update her post ...if user have a post with image user can change the image if user want to change just post or description it can posssible now using her post id.
 - in updating time user can delete her post image and post and user can post only title and description .
 - user can <b>like</b> her own and another post.
+- add<b>Comment</b>option in post.
 - update profile  features using UI.<br/>
 
 
