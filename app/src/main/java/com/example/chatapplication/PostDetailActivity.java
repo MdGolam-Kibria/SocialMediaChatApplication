@@ -42,14 +42,14 @@ import java.util.Locale;
 
 public class PostDetailActivity extends AppCompatActivity {
     //to get detail of  user and post
-    String hisUid, myUid, myEmail, myName, myDp, postId, pLikes, hisDp, hisName,pImage;
-    boolean mProgressComment= false;
+    String hisUid, myUid, myEmail, myName, myDp, postId, pLikes, hisDp, hisName, pImage;
+    boolean mProgressComment = false;
     boolean mProgressLike = false;
     //Progress bar
     ProgressDialog pd;
     //views
     ImageView uPictureIv, pImageIv;
-    TextView uNameTv, pTimeTiv, pTitleTv, pDescriptionTv, pLikesTv,pCommentsTv;
+    TextView uNameTv, pTimeTiv, pTitleTv, pDescriptionTv, pLikesTv, pCommentsTv;
     ImageButton moreBtn;
     Button likeBtn, shareBtn;
     LinearLayout profileLayout;
@@ -230,20 +230,20 @@ public class PostDetailActivity extends AppCompatActivity {
         likesRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.child(postId).hasChild(myUid)){//ei ref node e jodi current user er id thake
+                if (dataSnapshot.child(postId).hasChild(myUid)) {//ei ref node e jodi current user er id thake
                     //user has liked thi posts
                     /*to indicate that the post is liked by this (SignedIn) user i mean current user
                      *change drawable left button from like button
                      * change text of "Like" to "Liked"*/
-                    likeBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_liked,0,0,0);
+                    likeBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_liked, 0, 0, 0);
                     likeBtn.setText("Liked");
 
-                }else {
+                } else {
                     //user not liked this posts
                     /*to indicate that the post is not  liked by this (SignedIn) user i mean current user
                      *change drawable left button from like button
                      * change text of "Liked" to "Like"*/
-                    likeBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_like_black,0,0,0);
+                    likeBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_like_black, 0, 0, 0);
                     likeBtn.setText("Like");
                 }
             }
@@ -260,22 +260,22 @@ public class PostDetailActivity extends AppCompatActivity {
          *if currently signed in user has not liked it before
          * increase value by one , otherwise decrease value by one.
          */
-         mProgressLike=true;
-         //get id of the post clicked.
-            final DatabaseReference likeReference =  FirebaseDatabase.getInstance().getReference().child("Likes");
-            final DatabaseReference postsReference =  FirebaseDatabase.getInstance().getReference().child("Posts");
-         likeReference.addValueEventListener(new ValueEventListener() {
+        mProgressLike = true;
+        //get id of the post clicked.
+        final DatabaseReference likeReference = FirebaseDatabase.getInstance().getReference().child("Likes");
+        final DatabaseReference postsReference = FirebaseDatabase.getInstance().getReference().child("Posts");
+        likeReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (mProgressLike){//if mProcessLike have true
-                    if (dataSnapshot.child(postId).hasChild(myUid)){//jodi current user er id("myUid") jodi Likes node e thake. tar mane
+                if (mProgressLike) {//if mProcessLike have true
+                    if (dataSnapshot.child(postId).hasChild(myUid)) {//jodi current user er id("myUid") jodi Likes node e thake. tar mane
                         //already liked , so remove like
-                        postsReference.child(postId).child("pLikes").setValue(""+(Integer.parseInt(pLikes)-1));//"pLikes" node a like koto hobe  seta set korlam
+                        postsReference.child(postId).child("pLikes").setValue("" + (Integer.parseInt(pLikes) - 1));//"pLikes" node a like koto hobe  seta set korlam
                         likeReference.child(postId).child(myUid).removeValue();
                         mProgressLike = false;
 
-                    }else {//not liked, so like it
-                        postsReference.child(postId).child("pLikes").setValue(""+(Integer.parseInt(pLikes)+1));
+                    } else {//not liked, so like it
+                        postsReference.child(postId).child("pLikes").setValue("" + (Integer.parseInt(pLikes) + 1));
                         likeReference.child(postId).child(myUid).setValue("Liked");//you can set any value
                         mProgressLike = false;
                     }
@@ -302,7 +302,7 @@ public class PostDetailActivity extends AppCompatActivity {
         }
         String timeStamp = String.valueOf(System.currentTimeMillis());
         // each post will have a child  "Comments" that will contain comments of that's post
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts").child(postId).child("Comments");
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts").child(postId).child("Comments");//here make coments node
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("cId", timeStamp);
         hashMap.put("comment", comment);
@@ -320,7 +320,7 @@ public class PostDetailActivity extends AppCompatActivity {
                         pd.dismiss();
                         Toast.makeText(PostDetailActivity.this, "Comment Added", Toast.LENGTH_SHORT).show();
                         commentEt.setText("");
-                        updateCommentCount();
+                        updateCommentCount();//now set comment number in database
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -337,14 +337,14 @@ public class PostDetailActivity extends AppCompatActivity {
     private void updateCommentCount() {
         //whenever user add comment incress the comment count as we did for like count
         mProgressComment = true;//jodi comment kora hoi tahole process ta true hobe
-        final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts").child(postId);
+        final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Posts").child(postId);//make database node for store comment number
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (mProgressComment){//process ta true hole ...
-                    String comments = ""+dataSnapshot.child("pComments").getValue();
-                    int newCommentsVal = Integer.parseInt(comments)+1;
-                    reference.child("pComments").setValue(""+newCommentsVal);
+                if (mProgressComment) {//process ta true hole ...
+                    String comments = "" + dataSnapshot.child("pComments").getValue();
+                    int newCommentsVal = Integer.parseInt(comments) + 1;
+                    reference.child("pComments").setValue("" + newCommentsVal);
                     mProgressComment = false;//jehoto comment er poriman add hoiya gese database e so process ta false
                 }
             }
@@ -399,10 +399,10 @@ public class PostDetailActivity extends AppCompatActivity {
                     String pTimeStamp = "" + ds.child("pTime").getValue();
                     pImage = "" + ds.child("pImage").getValue();
                     hisDp = "" + ds.child("uDp").getValue();
-                   hisUid = "" + ds.child("uid").getValue();
+                    hisUid = "" + ds.child("uid").getValue();
                     String uEmail = "" + ds.child("uEmail").getValue();
                     hisName = "" + ds.child("uName").getValue();
-                    String commentCount = ""+ds.child("pComments").getValue();
+                    String commentCount = "" + ds.child("pComments").getValue();
                     //convert timeStamp to proper format
                     Calendar calendar = Calendar.getInstance(Locale.getDefault());
                     calendar.setTimeInMillis(Long.parseLong(pTimeStamp));
@@ -412,7 +412,7 @@ public class PostDetailActivity extends AppCompatActivity {
                     pDescriptionTv.setText(pDescription);
                     pLikesTv.setText(pLikes + " Likes");
                     pTimeTiv.setText(pTime);
-                    pCommentsTv.setText(commentCount+" Comments");
+                    pCommentsTv.setText(commentCount + " Comments");
 
                     uNameTv.setText(hisName);
                     //set image to user who posted
