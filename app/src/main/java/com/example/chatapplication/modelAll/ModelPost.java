@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 public class ModelPost {
     //use same name as we given while upload post.
     //upload korar time  e jei name gula use korechilam segulai ekhane same to same use korte hobe.
-    String pId,pTitle,pDescr,pLikes,pImage,pTime,uid,uEmail,uDp,uName;
+    String pId,pTitle,pDescr,pLikes,pComments,pImage,pTime,uid,uEmail,uDp,uName;
 
 }

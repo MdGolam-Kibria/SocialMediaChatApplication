@@ -22,6 +22,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatapplication.AddPostActivity;
+import com.example.chatapplication.PostDetailActivity;
 import com.example.chatapplication.R;
 import com.example.chatapplication.ThereProfileActivity;
 import com.example.chatapplication.modelAll.ModelPost;
@@ -80,6 +81,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
         final String pImage = postList.get(position).getPImage();
         String pTimeStap = postList.get(position).getPTime();
         String pLikes = postList.get(position).getPLikes();//contains total number of likes for a post.
+        String pComments = postList.get(position).getPComments();//contains total number of comments for a post.
 
 
         Calendar calendar = Calendar.getInstance(Locale.getDefault());
@@ -92,6 +94,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
         holder.pTitleTv.setText(pTitle);
         holder.pDescriptionTv.setText(pDescription);
         holder.pLikesTv.setText(pLikes + " Likes");//set total number of likes for a post
+        holder.pCommentsTv.setText(pComments + " Comments");//set total number of comments for a post
         setLikes(holder,pId);
         //set user dp
         try {
@@ -162,8 +165,10 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
         holder.commentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //will implement later
-                Toast.makeText(context, "comment", Toast.LENGTH_SHORT).show();
+                //start PostDetailActivity
+                Intent intent = new Intent(context, PostDetailActivity.class);
+                intent.putExtra("postId",pId);//will get detail of post using this id ,its id of the post clicked
+                context.startActivity(intent);
             }
         });
         holder.shareBtn.setOnClickListener(new View.OnClickListener() {
@@ -224,8 +229,8 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
         if (uId.equals(myUid)) {//mane post er moddhe je gular id current user er sathe match korbe segula sei current user delete korte parbe
             popupMenu.getMenu().add(Menu.NONE, 0, 0, "Delete");
             popupMenu.getMenu().add(Menu.NONE, 1, 0, "Edit");
-
-        }
+             }
+        popupMenu.getMenu().add(Menu.NONE,2,0,"View Details");
         //add onClick listener in menu item
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -240,6 +245,11 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
                     Intent intent = new Intent(context, AddPostActivity.class);
                     intent.putExtra("key", "editPost");
                     intent.putExtra("editPostId", pId);
+                    context.startActivity(intent);
+                }else if (id==2){//if user clicked View Details options
+                    //start PostDetailActivity
+                    Intent intent = new Intent(context, PostDetailActivity.class);
+                    intent.putExtra("postId",pId);//will get detail of post using this id ,its id of the post clicked
                     context.startActivity(intent);
                 }
                 return false;
@@ -334,7 +344,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
     class MyHolder extends RecyclerView.ViewHolder {
         //views from row_post.xml
         ImageView uPictureIv, pImageIv;
-        TextView uNameTv, pTimeTv, pTitleTv, pDescriptionTv, pLikesTv;
+        TextView uNameTv, pTimeTv, pTitleTv, pDescriptionTv, pLikesTv,pCommentsTv;
         ImageButton moreBtn;
         Button likeBtn, commentBtn, shareBtn;
         LinearLayout profileLayout;
@@ -350,6 +360,7 @@ public class AdapterPost extends RecyclerView.Adapter<AdapterPost.MyHolder> {
             uNameTv = itemView.findViewById(R.id.uNameTv);
             pTimeTv = itemView.findViewById(R.id.uTimeTv);
             pTitleTv = itemView.findViewById(R.id.pTitleTv);
+            pCommentsTv = itemView.findViewById(R.id.pCommentsTv);
             pDescriptionTv = itemView.findViewById(R.id.pDescriptionTv);
             pLikesTv = itemView.findViewById(R.id.pLikesTv);
             //image button

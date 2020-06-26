@@ -36,6 +36,7 @@ import com.example.chatapplication.adapter.AdapterPost;
 import com.example.chatapplication.convertImage.BitmapImageToString;
 import com.example.chatapplication.convertImage.StringImageCodeToBitmap;
 import com.example.chatapplication.modelAll.ModelPost;
+import com.example.chatapplication.notificatons.Data;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -406,7 +407,40 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                             }
                         });
+                        //update name in current users comments on posts
+                        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot ds : dataSnapshot.getChildren()){
+                                    String child = ds.getKey();
+                                    if (dataSnapshot.child(child).hasChild("Comments")){
+                                        String child1 = ""+dataSnapshot.child(child).getValue();
+                                        Query child2 = FirebaseDatabase.getInstance().getReference("Posts")
+                                                .child(child1).child("Comments").orderByChild("uid").equalTo(uid);
+                                                child2.addValueEventListener(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        for (DataSnapshot ds:dataSnapshot.getChildren()){
+                                                            String child = dataSnapshot.getKey();
+                                                            dataSnapshot.getRef().child(child).child("uName").setValue(value);
+                                                        }
+                                                    }
 
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
+
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
                     }
                 } else {
                     Toast.makeText(getActivity(), "please enter your " + key, Toast.LENGTH_SHORT).show();
@@ -632,6 +666,43 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                         for (DataSnapshot ds : dataSnapshot.getChildren()) {
                                             String child = ds.getKey();
                                             dataSnapshot.getRef().child(child).child("uDp").setValue(dawonloadUri.toString());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                                //when you change this part after chage ,,,here must change from video
+                                        //*Firebase Social Media App - 23 Add Comments 58:43 sec theke start
+                                //update name in current users comments on posts
+                                ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot ds : dataSnapshot.getChildren()){
+                                            String child = ds.getKey();
+                                            if (dataSnapshot.child(child).hasChild("Comments")){
+                                                String child1 = ""+dataSnapshot.child(child).getValue();
+                                                Query child2 = FirebaseDatabase.getInstance().getReference("Posts")
+                                                        .child(child1).child("Comments").orderByChild("uid").equalTo(uid);
+                                                child2.addValueEventListener(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        for (DataSnapshot ds:dataSnapshot.getChildren()){
+                                                            String child = dataSnapshot.getKey();
+                                                            dataSnapshot.getRef().child(child).child("uDp").setValue(dawonloadUri.toString());
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
+
+                                            }
                                         }
                                     }
 
