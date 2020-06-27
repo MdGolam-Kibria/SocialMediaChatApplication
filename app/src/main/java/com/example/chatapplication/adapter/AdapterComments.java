@@ -30,7 +30,7 @@ import java.util.Locale;
 public class AdapterComments extends RecyclerView.Adapter<AdapterComments.MyHolder> {
     Context context;
     List<ModelComment> commentsList;
-    String myUid,postId;
+    String myUid, postId;
 
     public AdapterComments(Context context, List<ModelComment> commentsList, String myUid, String postId) {
         this.context = context;
@@ -60,14 +60,14 @@ public class AdapterComments extends RecyclerView.Adapter<AdapterComments.MyHold
         Calendar calendar = Calendar.getInstance(Locale.getDefault());
         calendar.setTimeInMillis(Long.parseLong(timestamp));
         String cTime = DateFormat.format("dd/MM/yyy hh:mm aa", calendar).toString();
-         //set the data
+        //set the data
         holder.nameTv.setText(name);
         holder.commentTv.setText(comment);
         holder.timeTv.setText(cTime);
-       //set user dp
+        //set user dp
         try {
             Picasso.get().load(image).placeholder(R.drawable.ic_face_img).into(holder.avatarIv);
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
 //        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -81,7 +81,7 @@ public class AdapterComments extends RecyclerView.Adapter<AdapterComments.MyHold
             @Override
             public boolean onLongClick(View v) {
                 //check if this comment is by currently signedIn user or not
-                if (myUid.equals(uid)){
+                if (myUid.equals(uid)) {
                     //this is current user comment ,,,so current user can delete this comment
                     //show delete dialog
                     final AlertDialog.Builder builder = new AlertDialog.Builder(v.getRootView().getContext());
@@ -102,7 +102,7 @@ public class AdapterComments extends RecyclerView.Adapter<AdapterComments.MyHold
                     });
                     //show dialog
                     builder.create().show();
-                }else {
+                } else {
                     //this comment not current user comment
                     Toast.makeText(context, "Can't delete others comment..", Toast.LENGTH_SHORT).show();
                 }
@@ -114,9 +114,9 @@ public class AdapterComments extends RecyclerView.Adapter<AdapterComments.MyHold
     private void deleteComment(String cid) {
         final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Posts").child(postId);
 
-                ref.child("Comments").child(cid).removeValue();//it will delete the comment
-        
-                //now update the database comment count after delete a comment
+        ref.child("Comments").child(cid).removeValue();//it will delete the comment
+
+        //now update the database comment count after delete a comment
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
