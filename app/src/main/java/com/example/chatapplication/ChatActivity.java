@@ -292,6 +292,39 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        //create chatList node/child in firebase database...
+        final DatabaseReference chatRef1 = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(myUid)
+                .child(hisUid);
+        chatRef1.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (!dataSnapshot.exists()){//dataSnapshot data jodi biddaman na thake
+                        chatRef1.child("id").setValue(hisUid);
+                    }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        final DatabaseReference chatRef2 = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(hisUid)
+                .child(myUid);
+        chatRef2.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()){//dataSnapshot data jodi biddaman na thake
+                    chatRef2.child("id").setValue(myUid);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void sendNotification(final String hisUid, final String name, final String message) {
