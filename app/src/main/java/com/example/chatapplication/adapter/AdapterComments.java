@@ -116,7 +116,7 @@ public class AdapterComments extends RecyclerView.Adapter<AdapterComments.MyHold
 
                 ref.child("Comments").child(cid).removeValue();//it will delete the comment
         
-                //now update the database comment count
+                //now update the database comment count after delete a comment
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
