@@ -34,6 +34,7 @@ In this project we develop a social media application
 - user can <b>like</b> her own and another post.
 - add <b style="color:#EC7B02">Comment</b> option in post.
 - show posts comments.user can show her own comments and others comments on any posts.
+- implement <b> Comment Delete </b> option.....user can delete her own comment.
 - update profile  features using UI.<br/>
 
 
