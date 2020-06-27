@@ -33,6 +33,7 @@ In this project we develop a social media application
 - in updating time user can delete her post image and post and user can post only title and description .
 - user can <b>like</b> her own and another post.
 - add <b style="color:#EC7B02">Comment</b> option in post.
+- show posts comments.
 - update profile  features using UI.<br/>
 
 
