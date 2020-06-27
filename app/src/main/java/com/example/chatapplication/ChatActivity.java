@@ -278,15 +278,12 @@ public class ChatActivity extends AppCompatActivity {
         drefer.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Log.d("MyTag", ds.getValue(String.class));
-                    //  Log.d("sms",ds.child("name").getValue(String.class));
-                    //ModelUser user = ds.getValue(ModelUser.class);
+
+                    ModelUser user = dataSnapshot.getValue(ModelUser.class);
                     if (notify) {
-                        sendNotification(hisUid, ds.child("name").getValue(String.class), message);//problem here can't show user name get null
+                        sendNotification(hisUid,user.getName(),message);
                     }
                     notify = false;
-                }
             }
 
             @Override
@@ -309,7 +306,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Token token = ds.getValue(Token.class);
-                    Data data = new Data(myUid, name + ";" + message, timeStamp, hisUid, R.drawable.ic_face_img);
+                    Data data = new Data(myUid, name + " :  " + message, "New Message", hisUid, R.drawable.ic_face_img);
                     Sender sender = new Sender(data, token.getToken());
                     apiService.sendNotification(sender)
                             .enqueue(new Callback<Response>() {
