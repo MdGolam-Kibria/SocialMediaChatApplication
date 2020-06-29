@@ -36,6 +36,7 @@ In this project we develop a social media application
 - <b>show posts comments</b> . user can show her own comments and others comments on any posts.
 - implement <b> Comment Delete </b> option.....user can delete her own comment.
 - implement <b> chat history </b> in chats tab and show current active user and show last message.
+- implement <b> Share </b> option in posts.
 - update profile  features using UI.<br/>
 
 
