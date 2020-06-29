@@ -55,6 +55,21 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+<!--        define file provider-->
+<!--        set the android:exported attribute to false;-->
+<!--        the File provider hast need to be public-->
+<!--        set the android:grantUriPermissions attribute to true,-->
+<!--        to allow you to grant temporary access to file-->
+        <provider
+            android:authorities="com.example.chatapplication.fileprovider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/paths" />
+        </provider>
     </application>
 
 </manifest>

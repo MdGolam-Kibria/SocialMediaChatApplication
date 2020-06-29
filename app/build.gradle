@@ -55,6 +55,7 @@ dependencies {
     //For retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.0.2'
+    implementation 'androidx.preference:preference:1.1.1'
 
 
 }
